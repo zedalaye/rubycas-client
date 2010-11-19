@@ -15,7 +15,7 @@ module CasSessionStore
       end
 
       def delete_service_session_lookup(st)
-        CasSession.find_by_service_ticket(st.ticket).destroy
+        CasSession.find_by_service_ticket(st).destroy
       end
     end
   end
