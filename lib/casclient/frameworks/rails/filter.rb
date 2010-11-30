@@ -1,3 +1,6 @@
+require 'casclient/frameworks/rails/cas_session_stores/db_cas_session'
+require 'casclient/frameworks/rails/cas_session_stores/file_cas_session'
+
 module CASClient
   module Frameworks
     module Rails
