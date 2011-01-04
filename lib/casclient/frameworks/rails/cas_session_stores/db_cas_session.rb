@@ -10,12 +10,17 @@ module CasSessionStore
         CasSession.create(:service_ticket => st.ticket, :session_id => sid)
       end
 
+      # find CAS-ticket
       def read_service_session_lookup(st)
-        CasSession.find_by_service_ticket(st).session_id
+        CasSession.where(:service_ticket => st).first.try(:session_id)
       end
 
+      # delete CAS-ticket
       def delete_service_session_lookup(st)
-        CasSession.find_by_service_ticket(st).destroy
+        # efficient but doesn't invoke callbacks
+        # CasSession.delete_all(:service_ticket => st)
+        # not so efficient but does invoke callbacks
+        CasSession.destroy_all(:service_ticket => st)
       end
     end
   end
