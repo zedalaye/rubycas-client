@@ -301,6 +301,21 @@ To install the library on an Debian/Ubuntu system:
 
 For other platforms you'll have to figure it out yourself.
 
+== Rails 3 Support (temporary solution)
+If you require to support Sing-Sign-out and Rails version is > = 3 you need to add following code.
+It was required due to bug using Rails 3.x.x and SSO. Without using SSO you can use default config parameters with Rails 3.
+
+CASClient::Frameworks::Rails::Filter.configure(
+  :cas_base_url => "https://cas.example.foo/",
+  :enable_single_sign_out => true,
+  :session_store => ActiveRecord::SessionStore, 
+  :rails3 => true
+)
+
+where 
+  :rails3 - is indicating whether Rails 3.x.x is used or not
+  :session_store  - provide session storage. Example: ActiveRecord::SessionStore
+
 == Testing
 
 In some cases, especially those using Cucumber or other tools that simply can't work with 
