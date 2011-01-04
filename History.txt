@@ -1,5 +1,8 @@
 = RubyCAS-Client Changelog
 
+== Version 2.2.1 :: 2011-01-04
+* Added support for Rails 3
+
 == Version 2.2.1 :: 2010-06-24
 
 * Removed a 3rd party patch to the logging mechanism that broke the client under

@@ -14,7 +14,6 @@ module CASClient
         class << self
           def filter(controller)
             raise "Cannot use the CASClient filter because it has not yet been configured." if config.nil?
-            
             if @@fake_user
               controller.session[client.username_session_key] = @@fake_user
               controller.session[:casfilteruser] = @@fake_user
@@ -268,7 +267,6 @@ module CASClient
           
           private
           def single_sign_out(controller)
-            
             # Avoid calling raw_post (which may consume the post body) if
             # this seems to be a file upload
             if content_type = controller.request.headers["CONTENT_TYPE"] &&
@@ -293,7 +291,11 @@ module CASClient
               
               begin
                 required_sess_store = ActiveRecord::SessionStore
-                current_sess_store  = ActionController::Base.session_store
+                if config[:rails3]
+                  current_sess_store  = config[:session_store]
+                else
+                  current_sess_store  = ActionController::Base.session_store
+                end
               rescue NameError
                 # for older versions of Rails (prior to 2.3)
                 required_sess_store = CGI::Session::ActiveRecordStore
