@@ -12,7 +12,7 @@ module CasSessionStore
 
       # find CAS-ticket
       def read_service_session_lookup(st)
-        obj = CasSession.where(:service_ticket => st).first.
+        obj = CasSession.where(:service_ticket => st).first
         obj.session_id if obj
       end
 
