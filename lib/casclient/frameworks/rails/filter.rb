@@ -1,3 +1,6 @@
+require 'casclient/frameworks/rails/cas_session_stores/db_cas_session'
+require 'casclient/frameworks/rails/cas_session_stores/file_cas_session'
+
 module CASClient
   module Frameworks
     module Rails
@@ -142,6 +145,12 @@ module CASClient
             @@config[:logger] = RAILS_DEFAULT_LOGGER unless @@config[:logger]
             @@client = CASClient::Client.new(config)
             @@log = client.log
+            if config[:service_session_lookup_storage]
+              storage_module = CasSessionStore.const_get("#{config[:service_session_lookup_storage].to_s.classify}CasSession")
+              include storage_module unless included_modules.include?(storage_module)
+            else
+              include CasSessionStore::FileCasSession
+            end
           end
           
           # used to allow faking for testing
@@ -218,7 +227,7 @@ module CASClient
           def logout(controller, service = nil)
             referer = service || controller.request.referer
             st = controller.session[:cas_last_valid_ticket]
-            delete_service_session_lookup(st) if st
+            delete_service_session_lookup(st.ticket) if st
             controller.send(:reset_session)
             controller.send(:redirect_to, client.logout_url(referer))
           end
@@ -310,6 +319,7 @@ module CASClient
                   session = current_sess_store::Session.find_by_session_id(session_id)
                   if session
                     session.destroy
+                    delete_service_session_lookup(si)
                     log.debug("Destroyed #{session.inspect} for session #{session_id.inspect} corresponding to service ticket #{si.inspect}.")
                   else
                     log.debug("Data for session #{session_id.inspect} was not found. It may have already been cleared by a local CAS logout request.")
@@ -363,46 +373,6 @@ module CASClient
             service_url = controller.url_for(params)
             log.debug("Guessed service url: #{service_url.inspect}")
             return service_url
-          end
-          
-          # Creates a file in tmp/sessions linking a SessionTicket
-          # with the local Rails session id. The file is named
-          # cas_sess.<session ticket> and its text contents is the corresponding 
-          # Rails session id.
-          # Returns the filename of the lookup file created.
-          def store_service_session_lookup(st, sid)
-            st = st.ticket if st.kind_of? ServiceTicket
-            f = File.new(filename_of_service_session_lookup(st), 'w')
-            f.write(sid)
-            f.close
-            return f.path
-          end
-          
-          # Returns the local Rails session ID corresponding to the given
-          # ServiceTicket. This is done by reading the contents of the
-          # cas_sess.<session ticket> file created in a prior call to 
-          # #store_service_session_lookup.
-          def read_service_session_lookup(st)
-            st = st.ticket if st.kind_of? ServiceTicket
-            ssl_filename = filename_of_service_session_lookup(st)
-            return File.exists?(ssl_filename) && IO.read(ssl_filename)
-          end
-          
-          # Removes a stored relationship between a ServiceTicket and a local
-          # Rails session id. This should be called when the session is being
-          # closed.
-          #
-          # See #store_service_session_lookup.
-          def delete_service_session_lookup(st)
-            st = st.ticket if st.kind_of? ServiceTicket
-            ssl_filename = filename_of_service_session_lookup(st)
-            File.delete(ssl_filename) if File.exists?(ssl_filename)
-          end
-          
-          # Returns the path and filename of the service session lookup file.
-          def filename_of_service_session_lookup(st)
-            st = st.ticket if st.kind_of? ServiceTicket
-            return "#{RAILS_ROOT}/tmp/sessions/cas_sess.#{st}"
           end
         end
       end
