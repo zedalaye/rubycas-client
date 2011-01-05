@@ -9,8 +9,8 @@ class CreateCasSessions < ActiveRecord::Migration
   end
  
   def self.down
-    drop_table :cas_sessions
-	remove_index  :cas_sessions, [:service_ticket]
+	  remove_index  :cas_sessions, [:service_ticket]
+	  drop_table :cas_sessions
   end
 end
 
