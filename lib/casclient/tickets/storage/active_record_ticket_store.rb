@@ -30,7 +30,10 @@ module CASClient
             Rails.logger.info("Session #{session_id} was not found in the ActiveRecord Store. Creating...")
             ActiveRecord::SessionStore::Session.create(
               service_ticket: st,
-              session_id: session_id)
+              session_id: session_id,
+              data: {}
+            )
+            debugger
           else
             ActiveRecord::SessionStore::Session.update_all(
                 %(service_ticket="%s") % st,
