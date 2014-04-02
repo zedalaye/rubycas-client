@@ -27,13 +27,11 @@ module CASClient
 
           session_id = session_id_from_controller(controller)
           Rails.logger.info("L4ME: Session ID: #{session_id}")
-          #ActiveRecord::SessionStore::Session.update_all(
-          #  %(service_ticket="%s") % st,
-          #  ["session_id=?", session_id]
-          #)
-          session = ActiveRecord::SessionStore::Session.find_by_session_id(session_id)
-          session.service_ticket = st
-          session.save(false)
+          debugger
+          ActiveRecord::SessionStore::Session.update_all(
+            %(service_ticket="%s") % st,
+            ["session_id=?", session_id]
+          )
         end
 
         def read_service_session_lookup(st)
