@@ -31,9 +31,8 @@ module CASClient
             ActiveRecord::SessionStore::Session.create(
               service_ticket: st,
               session_id: session_id,
-              data: {}
+              data: env["rack.session.record"][:data]
             )
-            debugger
           else
             ActiveRecord::SessionStore::Session.update_all(
                 %(service_ticket="%s") % st,
