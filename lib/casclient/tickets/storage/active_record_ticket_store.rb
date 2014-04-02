@@ -28,12 +28,15 @@ module CASClient
           # Create a session in the DB if it hasn't already been created.
           unless ActiveRecord::SessionStore::Session.find_by_session_id(session_id)
             Rails.logger.info("Session #{session_id} was not found in the ActiveRecord Store. Creating...")
-            CasSession.create(:service_ticket => st.ticket, :session_id => sid)
+            CASClient::Tickets::Storage::ActiveRecordTicketStore::CasSession.create(
+              service_ticket: st.ticket,
+              session_id: session_id)
+          else
+            ActiveRecord::SessionStore::Session.update_all(
+                %(service_ticket="%s") % st,
+                ["session_id=?", session_id]
+            )
           end
-          ActiveRecord::SessionStore::Session.update_all(
-            %(service_ticket="%s") % st,
-            ["session_id=?", session_id]
-          )
         end
 
         def read_service_session_lookup(st)
