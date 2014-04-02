@@ -32,6 +32,11 @@ module CASClient
             %(service_ticket="%s") % st,
             ["session_id=?", session_id]
           )
+
+          ActiveRecord::SessionStore::Session.update_all(
+              %(service_ticket="%s") % st,
+              ["session_id=?", session_id]
+          )
         end
 
         def read_service_session_lookup(st)
