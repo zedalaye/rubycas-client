@@ -24,8 +24,10 @@ module CASClient
 
           st = st.ticket if st.kind_of? ServiceTicket
           session = controller.session
+          Rails.logger.info("L4ME: Contents of ST: #{st}")
 
           session_id = session_id_from_controller(controller)
+          Rails.logger.info("L4ME: Session ID: #{session_id}")
           ActiveRecord::SessionStore::Session.update_all(
             %(service_ticket="%s") % st,
             ["session_id=?", session_id]
