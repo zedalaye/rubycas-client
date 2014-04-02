@@ -27,6 +27,7 @@ module CASClient
           session_id = session_id_from_controller(controller)
           # Create a session in the DB if it hasn't already been created.
           unless ActiveRecord::SessionStore::Session.find_by_session_id(session_id)
+            debugger
             Rails.logger.info("Session #{session_id} was not found in the ActiveRecord Store. Creating...")
             ActiveRecord::SessionStore::Session.create(
               service_ticket: st,
