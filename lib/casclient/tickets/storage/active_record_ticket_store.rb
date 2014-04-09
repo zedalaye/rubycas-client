@@ -23,13 +23,25 @@ module CASClient
           raise CASException, "No controller specified." unless controller
 
           st = st.ticket if st.kind_of? ServiceTicket
-          session = controller.session
-
           session_id = session_id_from_controller(controller)
-          ActiveRecord::SessionStore::Session.update_all(
-            %(service_ticket="%s") % st,
-            ["session_id=?", session_id]
-          )
+
+          # Create a session in the DB if it hasn't already been created.
+          unless ActiveRecord::SessionStore::Session.find_by_session_id(session_id)
+            log.info("RubyCAS Client did not find #{session_id} in the Session Store. Creating it now!")
+            new_session = ActiveRecord::SessionStore::Session.create(
+              service_ticket: st,
+              session_id: session_id,
+              data: {}
+            )
+            # Set the rack session record variable so the service doesn't create a duplicate session and instead updates
+            # the data attribute appropriately.
+            controller.env["rack.session.record"] = new_session
+          else
+            ActiveRecord::SessionStore::Session.update_all(
+                %(service_ticket="%s") % st,
+                ["session_id=?", session_id]
+            )
+          end
         end
 
         def read_service_session_lookup(st)
