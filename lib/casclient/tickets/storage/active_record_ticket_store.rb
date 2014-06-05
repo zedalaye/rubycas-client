@@ -19,8 +19,8 @@ module CASClient
         end
 
         def store_service_session_lookup(st, controller)
-          raise CASException, "No service_ticket specified." unless st
-          raise CASException, "No controller specified." unless controller
+          raise CASException, 'No service_ticket specified.' unless st
+          raise CASException, 'No controller specified.' unless controller
 
           st = st.ticket if st.kind_of? ServiceTicket
           session_id = session_id_from_controller(controller)
@@ -36,7 +36,7 @@ module CASClient
             if new_session.save
               # Set the rack session record variable so the service doesn't create a duplicate session and instead updates
               # the data attribute appropriately.
-              controller.env["rack.session.record"] = new_session
+              controller.env['rack.session.record'] = new_session
             else
               raise CASException, "Unable to store session #{session_id} for service ticket #{st} in the database."
             end
