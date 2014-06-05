@@ -7,10 +7,11 @@ module CasSessionStore
 
     module ClassMethods
       def store_service_session_lookup(st, sid)
+        # We need to use .save instead of .create or the service_ticket won't be stored
         cas = CasSession.new
         cas.service_ticket = st.ticket
         cas.session_id = sid
-        cas.save()
+        cas.save!
       end
 
       # find CAS-ticket

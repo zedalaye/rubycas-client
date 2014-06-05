@@ -28,11 +28,13 @@ module CASClient
           # Create a session in the DB if it hasn't already been created.
           unless ActiveRecord::SessionStore::Session.find_by_session_id(session_id)
             log.info("RubyCAS Client did not find #{session_id} in the Session Store. Creating it now!")
+
+            # We need to use .save instead of .create or the service_ticket won't be stored
             new_session = ActiveRecord::SessionStore::Session.new
             new_session.service_ticket = st
             new_session.session_id = session_id
             new_session.data = {}
-            new_session.save
+            new_session.save!
             # Set the rack session record variable so the service doesn't create a duplicate session and instead updates
             # the data attribute appropriately.
             controller.env["rack.session.record"] = new_session
