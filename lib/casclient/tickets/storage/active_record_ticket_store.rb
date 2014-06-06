@@ -19,8 +19,8 @@ module CASClient
         end
 
         def store_service_session_lookup(st, controller)
-          raise CASException, "No service_ticket specified." unless st
-          raise CASException, "No controller specified." unless controller
+          raise CASException, 'No service_ticket specified.' unless st
+          raise CASException, 'No controller specified.' unless controller
 
           st = st.ticket if st.kind_of? ServiceTicket
           session_id = session_id_from_controller(controller)
@@ -28,14 +28,18 @@ module CASClient
           # Create a session in the DB if it hasn't already been created.
           unless ActiveRecord::SessionStore::Session.find_by_session_id(session_id)
             log.info("RubyCAS Client did not find #{session_id} in the Session Store. Creating it now!")
-            new_session = ActiveRecord::SessionStore::Session.create(
-              service_ticket: st,
-              session_id: session_id,
-              data: {}
-            )
-            # Set the rack session record variable so the service doesn't create a duplicate session and instead updates
-            # the data attribute appropriately.
-            controller.env["rack.session.record"] = new_session
+            # We need to use .save instead of .create or the service_ticket won't be stored
+            new_session = ActiveRecord::SessionStore::Session.new
+            new_session.service_ticket = st
+            new_session.session_id = session_id
+            new_session.data = {}
+            if new_session.save
+              # Set the rack session record variable so the service doesn't create a duplicate session and instead updates
+              # the data attribute appropriately.
+              controller.env['rack.session.record'] = new_session
+            else
+              raise CASException, "Unable to store session #{session_id} for service ticket #{st} in the database."
+            end
           else
             ActiveRecord::SessionStore::Session.update_all(
                 %(service_ticket="%s") % st,
