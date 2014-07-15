@@ -42,7 +42,7 @@ module CASClient
             end
           else
             ActiveRecord::SessionStore::Session.update_all(
-                %(service_ticket="%s") % st,
+                %(service_ticket='%s') % st,
                 ["session_id=?", session_id]
             )
           end
