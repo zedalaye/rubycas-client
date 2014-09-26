@@ -41,10 +41,8 @@ module CASClient
               raise CASException, "Unable to store session #{session_id} for service ticket #{st} in the database."
             end
           else
-            ActiveRecord::SessionStore::Session.update_all(
-                %(service_ticket='%s') % st,
-                ["session_id=?", session_id]
-            )
+            ActiveRecord::SessionStore::Session.where(session_id: session_id).
+              update_all(service_ticket: st)
           end
         end
 
