@@ -80,7 +80,7 @@ module CASClient
 
         private
         def update_all_sessions(session_id, service_ticket)
-          if RAILS::VERSION::MAJOR == 4
+          if ActiveRecord::VERSION::MAJOR.to_i == 4
             ActiveRecord::SessionStore::Session.where(session_id: session_id).
               update_all(service_ticket: service_ticket)
           else
