@@ -173,4 +173,13 @@ describe CASClient::Frameworks::Rails::Filter do
       end
     end
   end
+
+  context 'controller request auto session timeout' do
+    subject { Hash.new }
+    it 'should return a timeout value' do
+      subject[:cas_extra_attributes] = { timeout: '1800' }
+      controller = mock_controller_with_session(nil, subject)
+      CASClient::Frameworks::Rails::Filter.auto_session_timeout(controller).should eq(1800)
+    end
+  end
 end
