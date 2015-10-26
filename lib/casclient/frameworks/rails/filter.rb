@@ -272,8 +272,12 @@ module CASClient
             controller.send(:redirect_to, redirect_url)
           end
 
-          def auto_session_timeout
-            (@@timeout || DEFAULT_TIMEOUT).to_i
+          def auto_session_timeout(controller)
+            if controller.session[client.extra_attributes_session_key]
+              controller.session[client.extra_attributes_session_key][:timeout].to_i
+            else
+              DEFAULT_TIMEOUT
+            end
           end
 
           private
