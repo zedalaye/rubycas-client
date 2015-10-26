@@ -10,7 +10,6 @@ module CASClient
         @@log = nil
         @@fake_user = nil
         @@fake_extra_attributes = nil
-        @@timeout = nil
         DEFAULT_TIMEOUT = 30.minutes
         
         class << self
@@ -74,7 +73,6 @@ module CASClient
                   # so we need to set this here to ensure compatibility with configurations
                   # built around the old client.
                   controller.session[:casfilteruser] = st.user
-                  @@timeout = st.extra_attributes[:timeout] if st.extra_attributes
                   if config[:enable_single_sign_out]
                     client.ticket_store.store_service_session_lookup(st, controller)
                   end
