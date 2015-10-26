@@ -274,7 +274,7 @@ module CASClient
 
           def auto_session_timeout(controller)
             if controller.session[client.extra_attributes_session_key]
-              controller.session[client.extra_attributes_session_key][:timeout].to_i
+              (controller.session[client.extra_attributes_session_key][:timeout] || DEFAULT_TIMEOUT).to_i
             else
               DEFAULT_TIMEOUT
             end
