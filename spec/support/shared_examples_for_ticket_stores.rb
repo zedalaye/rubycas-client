@@ -1,4 +1,9 @@
 shared_examples "a ticket store interacting with sessions" do
+
+  before do
+    stub_const("Rails::VERSION::MAJOR",'3')
+  end
+
   describe "#store_service_session_lookup" do
     it "should raise CASException if the Service Ticket is nil" do
       expect { subject.store_service_session_lookup(nil, "controller") }.to raise_exception(CASClient::CASException, /No service_ticket specified/)
