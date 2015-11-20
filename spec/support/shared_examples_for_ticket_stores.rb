@@ -1,7 +1,7 @@
 shared_examples "a ticket store interacting with sessions" do
 
   before do
-    stub_const("Rails::VERSION::MAJOR",'3')
+    stub_const("Rails::VERSION::MAJOR", 3)
   end
 
   describe "#store_service_session_lookup" do
