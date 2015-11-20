@@ -8,13 +8,13 @@ group :development do
   gem 'guard', '~> 1.0.0'
   gem 'guard-rspec', '~> 0.6'
   gem 'jeweler', '~> 1.8'
-  gem 'json', '~> 1.8'
+  gem 'json', '~> 1.6'
   gem 'rake', '~> 0.9'
   gem 'rspec', '~> 2.8'
   gem 'simplecov', '~> 0.5', require: false
 
   platforms :ruby do
-    gem 'sqlite3', '~> 1.3', '>= 1.3.11'
+    gem 'sqlite3', '~> 1.3'
   end
 
   platforms :jruby do
