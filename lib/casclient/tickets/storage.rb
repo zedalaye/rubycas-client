@@ -29,7 +29,7 @@ module CASClient
           session_id = read_service_session_lookup(st)
           unless session_id.nil?
             # This feels a bit hackish, but there isn't really a better way to go about it that I am aware of yet
-            if Rails::VERSION::STRING.start_with?("4")
+            if defined?(Rails::VERSION::STRING) && Rails::VERSION::STRING.start_with?("4")
               session = ActionDispatch::Session::ActiveRecordStore.session_class.find_by_session_id(session_id)
             else
               session = ActiveRecord::SessionStore.session_class.find_by_session_id(session_id)

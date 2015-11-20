@@ -23,6 +23,7 @@ group :development do
   end
 end
 
+gem 'debugger', '~> 1.6'
 gem 'activesupport', '~> 2.3', require: 'active_support'
 gem 'nokogiri', '~> 1.6'
 
