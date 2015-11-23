@@ -23,10 +23,6 @@ group :development do
   end
 end
 
-group :test, :development do
-  gem 'debugger', '~> 1.6'
-end
-
 gem 'activesupport', '~> 2.3', require: 'active_support'
 gem 'nokogiri', '~> 1.6'
 
