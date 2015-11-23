@@ -1,5 +1,9 @@
 = RubyCAS-Client Changelog
 
+== Version 2.3.10 :: 2015-11-23
+* New functionality
+  * Add support for Rails 4 applications
+
 == Version 2.3.9 :: 2012-06-20
 
 * Other
