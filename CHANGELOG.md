@@ -1,5 +1,9 @@
 = RubyCAS-Client Changelog
 
+== Version 2.3.11 :: 2016-01-27
+* New functionality
+  * Add dice-bag template
+
 == Version 2.3.10 :: 2015-11-23
 * New functionality
   * Add support for Rails 4 applications
