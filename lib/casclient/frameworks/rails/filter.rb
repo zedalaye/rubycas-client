@@ -13,6 +13,12 @@ module CASClient
         DEFAULT_TIMEOUT = 30.minutes
         
         class << self
+          # Needed for the reasons in this issue:
+          # https://github.com/rubycas/rubycas-client-rails/issues/27
+          def before(controller)
+            filter(controller)
+          end
+                    
           def filter(controller)
             raise "Cannot use the CASClient filter because it has not yet been configured." if config.nil?
             
