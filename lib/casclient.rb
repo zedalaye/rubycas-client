@@ -3,6 +3,7 @@ require 'cgi'
 require 'logger'
 require 'net/https'
 require 'rexml/document'
+require 'casclient/dice_bag/cas_template'
 
 begin
   require 'active_support'
