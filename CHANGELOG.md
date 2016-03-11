@@ -1,5 +1,10 @@
 = RubyCAS-Client Changelog
 
+== Version 2.3.12 :: 2016-03-11
+* New functionality
+  * Add before method to lib/casclient/frameworks/rails/filter.rb
+    in order to make rubycas-client compatible with rails 4
+
 == Version 2.3.11 :: 2016-01-27
 * New functionality
   * Add dice-bag template
