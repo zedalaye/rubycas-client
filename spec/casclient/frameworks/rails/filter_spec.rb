@@ -36,7 +36,7 @@ describe CASClient::Frameworks::Rails::Filter do
       it 'should set the session user and attributes and additional session attributes' do
         CASClient::Frameworks::Rails::Filter.filter(mock_controller_with_session(nil, subject))
         subject.should eq({ :cas_user => 'tester@test.com', :casfilteruser => 'tester@test.com',
-          :attr1 => 'val1', :attr2 => 'val2'})
+          :attr1 => 'val1', :attr2 => 'val2' })
       end
       after { CASClient::Frameworks::Rails::Filter.fake(nil, nil, nil) }
     end
