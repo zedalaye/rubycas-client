@@ -1,3 +1,5 @@
+require 'active_support/time'
+
 module CASClient
   module Frameworks
     module Rails
