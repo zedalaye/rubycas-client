@@ -13,6 +13,7 @@ module CASClient
         @@fake_user = nil
         @@fake_extra_attributes = nil
         DEFAULT_TIMEOUT = 30.minutes
+        DEFAULT_ACTIVITY_TRACKER_UPDATE_INTERVAL = 15.minutes
         
         class << self
           # Needed for the reasons in this issue:
@@ -285,6 +286,14 @@ module CASClient
               (controller.session[client.extra_attributes_session_key][:timeout] || DEFAULT_TIMEOUT).to_i
             else
               DEFAULT_TIMEOUT
+            end
+          end
+
+          def activity_tracker_update_interval(controller)
+            if controller.session[client.extra_attributes_session_key]
+              (controller.session[client.extra_attributes_session_key][:updateIntervalSeconds] || DEFAULT_ACTIVITY_TRACKER_UPDATE_INTERVAL).to_i
+            else
+              DEFAULT_ACTIVITY_TRACKER_UPDATE_INTERVAL
             end
           end
 

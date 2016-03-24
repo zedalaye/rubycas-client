@@ -192,4 +192,13 @@ describe CASClient::Frameworks::Rails::Filter do
       CASClient::Frameworks::Rails::Filter.auto_session_timeout(controller).should eq(1800)
     end
   end
+
+  context 'controller request activity tracker update interval' do
+    subject { Hash.new }
+    it 'should return an activity tracker update interval' do
+      subject[:cas_extra_attributes] = { updateIntervalSeconds: '900' }
+      controller = mock_controller_with_session(nil, subject)
+      expect(CASClient::Frameworks::Rails::Filter.activity_tracker_update_interval(controller)).to eq(900)
+    end
+  end
 end
