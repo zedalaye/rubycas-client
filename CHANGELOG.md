@@ -1,5 +1,10 @@
 = RubyCAS-Client Changelog
 
+== Version 2.3.13 :: 2016-03-23
+* New functionality
+  * Add the ability to set any top-level session attribute for the fake user.
+  * Add method returning the activity tracker update interval from the CAS extra attributes.
+
 == Version 2.3.12 :: 2016-03-11
 * New functionality
   * Add before method to lib/casclient/frameworks/rails/filter.rb
