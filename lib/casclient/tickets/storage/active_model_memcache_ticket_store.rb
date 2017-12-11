@@ -1,12 +1,12 @@
 module CASClient
   module Tickets
     module Storage
-    	class ActiveModelMemcacheTicketStore < AbstractTicketStore
+      class ActiveModelMemcacheTicketStore < AbstractTicketStore
         def initialize(config={})
           config ||= {}
         end
-				
-				def store_service_session_lookup(st, controller)
+        
+        def store_service_session_lookup(st, controller)
           raise CASException, 'No service_ticket specified.' unless st
           raise CASException, 'No controller specified.' unless controller
 
@@ -48,14 +48,14 @@ module CASClient
 
         private
         def update_all_sessions(session_id, st)
-          byebug
+          # to be implemented
         end
 
-    	end
+      end
 
-    	::ACTIVE_MODEL_MEMCACHE_TICKET_STORE = ActiveModelMemcacheTicketStore
+      ::ACTIVE_MODEL_MEMCACHE_TICKET_STORE = ActiveModelMemcacheTicketStore
 
-    	class MemcacheSessionStore
+      class MemcacheSessionStore
         include ActiveModel::Model
         attr_accessor :id, :session_id, :data, :created_at, :updated_at, :service_ticket
 
@@ -72,7 +72,7 @@ module CASClient
         def cache_token
           "service_ticket:#{self.service_ticket}"
         end
-    	end
+      end
 
     end
   end

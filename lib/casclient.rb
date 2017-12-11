@@ -4,7 +4,6 @@ require 'logger'
 require 'net/https'
 require 'rexml/document'
 require 'casclient/dice_bag/cas_template'
-require 'byebug'
 
 begin
   require 'active_support'
