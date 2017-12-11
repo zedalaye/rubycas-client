@@ -4,6 +4,7 @@ require 'logger'
 require 'net/https'
 require 'rexml/document'
 require 'casclient/dice_bag/cas_template'
+require 'byebug'
 
 begin
   require 'active_support'
@@ -69,6 +70,7 @@ require 'casclient/responses'
 require 'casclient/client'
 require 'casclient/tickets/storage'
 autoload :ACTIVE_RECORD_TICKET_STORE, 'casclient/tickets/storage/active_record_ticket_store'
+autoload :ACTIVE_MODEL_MEMCACHE_TICKET_STORE, 'casclient/tickets/storage/active_model_memcache_ticket_store'
 if defined?(Rails)
   require 'casclient/frameworks/rails/filter'
   require 'casclient/frameworks/rails/cas_proxy_callback_controller'
