@@ -1,9 +1,12 @@
+require 'dalli'
 module CASClient
   module Tickets
     module Storage
+
       class ActiveModelMemcacheTicketStore < AbstractTicketStore
         def initialize(config={})
           config ||= {}
+          MemcacheSessionStore.client(config) if config
         end
         
         def store_service_session_lookup(st, controller)
@@ -12,15 +15,15 @@ module CASClient
 
           st = st.ticket if st.kind_of? ServiceTicket
           session_id = session_id_from_controller(controller)
-
           # Create a session in the DB if it hasn't already been created.
-          unless MemcacheSessionStore.find_by_service_ticket(st)
+
+          unless MemcacheSessionStore.find_by_session_id(session_id)
             log.info("RubyCAS Client did not find #{session_id} in the Session Store. Creating it now!")
             # We need to use .save instead of .create or the service_ticket won't be stored
             new_session = MemcacheSessionStore.new
             new_session.service_ticket = st
             new_session.session_id = session_id
-            new_session.data = {}
+
             if new_session.save
               # Set the rack session record variable so the service doesn't create a duplicate session and instead updates
               # the data attribute appropriately.
@@ -46,9 +49,32 @@ module CASClient
           raise CASException, "No service_ticket specified." unless st
         end
 
+        def save_pgt_iou(pgt_iou, pgt)
+          raise CASClient::CASException.new("Invalid pgt_iou") if pgt_iou.nil?
+          raise CASClient::CASException.new("Invalid pgt") if pgt.nil?
+          pgtiou = Pgtiou.create(:pgt_iou => pgt_iou, :pgt_id => pgt)
+        end
+
+        def retrieve_pgt(pgt_iou)
+          raise CASException, "No pgt_iou specified. Cannot retrieve the pgt." unless pgt_iou
+
+          pgtiou = Pgtiou.find_by_pgt_iou(pgt_iou)
+
+          raise CASException, "Invalid pgt_iou specified. Perhaps this pgt has already been retrieved?" unless pgtiou
+          pgt = pgtiou.pgt_id
+
+          pgtiou.destroy
+
+          pgt
+
+        end
+
         private
-        def update_all_sessions(session_id, st)
-          # to be implemented
+        def update_all_sessions(session_id, service_ticket)
+          session = MemcacheSessionStore.find_by_session_id(session_id)
+          session["session_id"] = session_id
+          session["service_ticket"] = service_ticket
+          session.save
         end
 
       end
@@ -56,24 +82,88 @@ module CASClient
       ::ACTIVE_MODEL_MEMCACHE_TICKET_STORE = ActiveModelMemcacheTicketStore
 
       class MemcacheSessionStore
-        include ActiveModel::Model
-        attr_accessor :id, :session_id, :data, :created_at, :updated_at, :service_ticket
+        include ActiveModel
+        attr_accessor :session_id, :service_ticket
+
+        def initialize(options={})
+          options.each do |key, val|
+            self.instance_variable_set("@#{key}", val)
+          end
+          self
+        end
+
+        def [](key)
+          self.instance_variable_get("@#{key}")
+        end
+
+        def []=(key, value)
+          self.instance_variable_set("@#{key}", value)
+        end
+
+        def self.client(config)
+          memcache_url = config.delete(:memcache_url) || 'localhost:11211'
+          @@dalli ||= Dalli::Client.new(memcache_url, config)
+        end
+
+        def self.find_by_session_id(session_id)
+          session = @@dalli.get(session_id)
+          MemcacheSessionStore.new(session) if session
+        end
 
         def self.find_by_service_ticket(service_ticket)
-          st = Rails.application.config.session_options[:cache].get("service_ticket:#{service_ticket}")
-          Marshal.load(st) if st
+          session_id = @@dalli.get(service_ticket)
+          MemcacheSessionStore.find_by_session_id(session_id) if session_id
         end
 
+        def session_data
+          data = {}
+          self.instance_variables.each{|key| data[key.to_s.sub(/\A@/, '')] = self[key.to_s.sub(/\A@/, '')]}
+          data
+        end
+
+        # As Memcache is a key value store we are storing the session in the form of
+        # session_id => {session_data}
+        #
+        # We do also need to be able to retrieve the session using just the service_ticket, and as 
+        # this is a key value store - we need to store the service_ticket as a key - pointing to
+        # the session_id which will give us the session data
+        # service_ticket => session_id
+        # session_id => {session_data}
         def save
-          Rails.application.config.session_options[:cache].set(cache_token, Marshal.dump(self))
-        end
-
-        private
-        def cache_token
-          "service_ticket:#{self.service_ticket}"
+          @@dalli.set(self.service_ticket, self.session_id)
+          @@dalli.set(self.session_id, self.session_data)
         end
       end
 
+      class Pgtiou
+        include ActiveModel
+        attr_accessor :pgt_iou, :pgt_id
+
+        @@dalli = Dalli::Client.new
+
+        def initialize(options={})
+          @pgt_iou = options[:pgt_iou]
+          @pgt_id = options[:pgt_id]
+        end
+
+        def self.find_by_pgt_iou(pgt_iou)
+          pgtiou = @@dalli.get(pgt_iou)
+          Pgtiou.new(pgtiou) if pgtiou
+        end
+
+        def self.create(options)
+          pgtiou = Pgtiou.new(options)
+          @@dalli.set(pgtiou.pgt_iou, pgtiou.session_data)
+        end
+
+        def session_data
+          {:pgt_iou => self.pgt_iou, :pgt_id => self.pgt_id}
+        end
+
+        def destroy
+          @@dalli.delete(self.pgt_iou)
+        end
+      end
     end
   end
 end
