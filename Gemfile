@@ -5,7 +5,7 @@ group :development do
   gem 'dalli', '~>2.7'
   gem 'database_cleaner', '~> 0.7'
   gem 'jeweler', '~> 1.8'
-  gem 'json', '~> 1.6'
+  gem 'json', '~> 1.8'
   gem 'rake', '~> 0.9'
   gem 'rspec', '~> 2.8'
   gem 'simplecov', '~> 0.5', require: false
