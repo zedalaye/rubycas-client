@@ -66,7 +66,7 @@ GEM
       rake
       rdoc
     journey (1.0.4)
-    json (1.8.3)
+    json (1.8.6)
     listen (3.0.6)
       rb-fsevent (>= 0.9.3)
       rb-inotify (>= 0.9.7)
@@ -134,7 +134,7 @@ DEPENDENCIES
   guard-rspec
   jeweler (~> 1.8)
   jruby-openssl
-  json (~> 1.8)
+  json (>= 1.8.5)
   nokogiri (~> 1.6)
   rake (~> 0.9)
   rspec (~> 2.8)
