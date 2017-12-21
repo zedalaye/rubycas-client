@@ -37,7 +37,7 @@ module CASClient
         end
 
         def read_service_session_lookup(st)
-          raise CASException, "No service_ticket specified." unless st
+          raise CASException, 'No service_ticket specified.' unless st
           st = st.ticket if st.kind_of? ServiceTicket
           session = MemcacheSessionStore.find_by_service_ticket(st)
           session ? session.session_id : nil
@@ -46,21 +46,21 @@ module CASClient
         def cleanup_service_session_lookup(st)
           #no cleanup needed for this ticket store
           #we still raise the exception for API compliance
-          raise CASException, "No service_ticket specified." unless st
+          raise CASException, 'No service_ticket specified.' unless st
         end
 
         def save_pgt_iou(pgt_iou, pgt)
-          raise CASClient::CASException.new("Invalid pgt_iou") if pgt_iou.nil?
-          raise CASClient::CASException.new("Invalid pgt") if pgt.nil?
-          pgtiou = Pgtiou.create(:pgt_iou => pgt_iou, :pgt_id => pgt)
+          raise CASClient::CASException.new('Invalid pgt_iou') unless pgt_iou
+          raise CASClient::CASException.new('Invalid pgt') unless pgt
+          pgtiou = Pgtiou.create(pgt_iou: pgt_iou, pgt_id: pgt)
         end
 
         def retrieve_pgt(pgt_iou)
-          raise CASException, "No pgt_iou specified. Cannot retrieve the pgt." unless pgt_iou
+          raise CASException, 'No pgt_iou specified. Cannot retrieve the pgt.' unless pgt_iou
 
           pgtiou = Pgtiou.find_by_pgt_iou(pgt_iou)
 
-          raise CASException, "Invalid pgt_iou specified. Perhaps this pgt has already been retrieved?" unless pgtiou
+          raise CASException, 'Invalid pgt_iou specified. Perhaps this pgt has already been retrieved?' unless pgtiou
           pgt = pgtiou.pgt_id
 
           pgtiou.destroy
