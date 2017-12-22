@@ -69,6 +69,8 @@ require 'casclient/responses'
 require 'casclient/client'
 require 'casclient/tickets/storage'
 
+# Arel errors in case >= ruby 2.4.0
+# need to create aliases as given in the file
 require 'arel'
 require 'casclient/arel_alias'
 
