@@ -40,7 +40,7 @@ module CASClient
           raise CASException, 'No service_ticket specified.' unless st
           st = st.ticket if st.kind_of? ServiceTicket
           session = MemcacheSessionStore.find_by_service_ticket(st)
-          session ? session.session_id : nil
+          session && session.session_id
         end
 
         def cleanup_service_session_lookup(st)
@@ -57,16 +57,12 @@ module CASClient
 
         def retrieve_pgt(pgt_iou)
           raise CASException, 'No pgt_iou specified. Cannot retrieve the pgt.' unless pgt_iou
-
           pgtiou = Pgtiou.find_by_pgt_iou(pgt_iou)
-
           raise CASException, 'Invalid pgt_iou specified. Perhaps this pgt has already been retrieved?' unless pgtiou
+
           pgt = pgtiou.pgt_id
-
           pgtiou.destroy
-
           pgt
-
         end
 
         private
@@ -157,7 +153,7 @@ module CASClient
         end
 
         def session_data
-          {:pgt_iou => self.pgt_iou, :pgt_id => self.pgt_id}
+          {pgt_iou: self.pgt_iou, pgt_id: self.pgt_id}
         end
 
         def destroy
