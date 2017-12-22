@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.summary = "Client library for the Central Authentication Service (CAS) protocol."
 
   s.add_runtime_dependency 'activesupport', ">= 0"
+  s.add_runtime_dependency 'dalli', '>=2.0'
   s.add_runtime_dependency 'dice_bag', '>= 0.9', '< 2.0'
   s.add_development_dependency 'json', '>= 0'
   s.add_development_dependency 'rspec', '>= 0'

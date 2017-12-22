@@ -2,7 +2,6 @@ source 'http://rubygems.org'
 
 group :development do
   gem 'actionpack', '~> 3.2', require: 'action_pack'
-  gem 'dalli', '~>2.7'
   gem 'database_cleaner', '~> 0.7'
   gem 'jeweler', '~> 1.8'
   gem 'json', '>= 1.8.5'
