@@ -97,11 +97,16 @@ module CASClient
         end
 
         def self.client(config)
-          memcache_url = config.delete(:memcache_url) || 'localhost:11211'
-          @@dalli ||= Dalli::Client.new(memcache_url, config)
+          memcache_url = config && config[:dalli_settings] && "#{config[:dalli_settings]['host']}:#{config[:dalli_settings]['port']}" || 'localhost:11211'
+          options = config[:dalli_settings].clone if config.has_key?(:dalli_settings)
+          options.delete("host") if options && options.has_key?("host")
+          options.delete("port") if options && options.has_key?("port")
+          @@options = options || {}
+          @@dalli ||= Dalli::Client.new(memcache_url, @@options)
         end
 
         def self.find_by_session_id(session_id)
+          session_id = "#{@@options['namespace']}:#{session_id}"
           session = @@dalli.get(session_id)
           MemcacheSessionStore.new(session) if session
         end
@@ -127,7 +132,7 @@ module CASClient
         # session_id => {session_data}
         def save
           @@dalli.set(self.service_ticket, self.session_id)
-          @@dalli.set(self.session_id, self.session_data)
+          @@dalli.set("#{@@options['namespace']}:#{self.session_id}", self.session_data)
         end
       end
 
