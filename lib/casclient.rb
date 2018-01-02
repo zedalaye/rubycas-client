@@ -71,8 +71,11 @@ require 'casclient/tickets/storage'
 
 # Arel errors in case >= ruby 2.4.0
 # need to create aliases as given in the file
+
 require 'arel'
-require 'casclient/arel_alias' if RUBY_VERSION.to_f >= 2.4
+if Arel::VERSION.to_f < 6.0
+  require 'casclient/arel_alias'
+end
 
 autoload :ACTIVE_RECORD_TICKET_STORE, 'casclient/tickets/storage/active_record_ticket_store'
 autoload :ACTIVE_MODEL_MEMCACHE_TICKET_STORE, 'casclient/tickets/storage/active_model_memcache_ticket_store'
