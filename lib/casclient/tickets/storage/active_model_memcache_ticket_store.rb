@@ -108,7 +108,11 @@ module CASClient
         def self.find_by_session_id(session_id)
           session_id = "#{@@options['namespace']}:#{session_id}"
           session = @@dalli.get(session_id)
-          MemcacheSessionStore.new(session) if session
+          if session && session.key?('service_ticket')
+            MemcacheSessionStore.new(session)
+          else
+            return false
+          end
         end
 
         def self.find_by_service_ticket(service_ticket)
