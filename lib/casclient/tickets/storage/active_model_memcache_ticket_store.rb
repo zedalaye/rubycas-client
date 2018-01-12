@@ -108,6 +108,8 @@ module CASClient
         def self.find_by_session_id(session_id)
           session_id = "#{@@options['namespace']}:#{session_id}"
           session = @@dalli.get(session_id)
+          # A session is generated immediately without actually logging in, the below line
+          # validates that we have a service_ticket so that we can store additional information
           if session && session.key?('service_ticket')
             MemcacheSessionStore.new(session)
           else
