@@ -118,7 +118,7 @@ module CASClient
         end
 
         def self.find_by_service_ticket(service_ticket)
-          session_id = @@dalli.get(service_ticket)
+          session_id = @@dalli.get("#{@@options['namespace']}:#{service_ticket}")
           MemcacheSessionStore.find_by_session_id(session_id) if session_id
         end
 
@@ -137,7 +137,7 @@ module CASClient
         # service_ticket => session_id
         # session_id => {session_data}
         def save
-          @@dalli.set(self.service_ticket, self.session_id)
+          @@dalli.set("#{@@options['namespace']}:#{self.service_ticket}", self.session_id)
           @@dalli.set("#{@@options['namespace']}:#{self.session_id}", self.session_data)
         end
       end
