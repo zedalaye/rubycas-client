@@ -13,6 +13,7 @@ module ActionControllerHelpers
     request.stub(:path_parameters) {{}}
     controller = double("Controller")
     controller.stub(:session) {session}
+    controller.stub(:env) {{}}
     controller.stub(:request) {request}
     controller.stub(:url_for) {"bogusurl"}
     controller.stub(:query_parameters) {query_parameters}
