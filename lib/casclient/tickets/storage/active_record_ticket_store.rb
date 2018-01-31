@@ -8,7 +8,7 @@ module CASClient
       # Proxy Granting Tickets and their IOUs are stored in the cas_pgtious table.
       #
       # This ticket store takes the following config parameters
-      # :pgtious_table_name - the name of the table 
+      # :pgtious_table_name - the name of the table
       class ActiveRecordTicketStore < AbstractTicketStore
 
         def initialize(config={})
@@ -80,7 +80,7 @@ module CASClient
 
         private
         def update_all_sessions(session_id, service_ticket)
-          if ActiveRecord::VERSION::MAJOR.to_i == 4
+          if ActiveRecord::VERSION::MAJOR.to_i >= 4
             ActiveRecord::SessionStore::Session.where(session_id: session_id).
               update_all(service_ticket: service_ticket)
           else

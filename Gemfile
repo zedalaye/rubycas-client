@@ -4,7 +4,7 @@ group :development do
   gem 'actionpack', '~> 3.2', require: 'action_pack'
   gem 'database_cleaner', '~> 0.7'
   gem 'jeweler', '~> 1.8'
-  gem 'json', '~> 1.6'
+  gem 'json', '>= 1.8.5'
   gem 'rake', '~> 0.9'
   gem 'rspec', '~> 2.8'
   gem 'simplecov', '~> 0.5', require: false

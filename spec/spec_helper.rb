@@ -30,10 +30,12 @@ RSpec.configure do |config|
 
   config.before(:each) do
     DatabaseCleaner.start
+    ActiveModelMemcacheTicketStoreHelpers.setup_memcache_store
   end
 
   config.after(:each) do
     DatabaseCleaner.clean
+    ActiveModelMemcacheTicketStoreHelpers.teardown_memcache_store
   end
 end
 

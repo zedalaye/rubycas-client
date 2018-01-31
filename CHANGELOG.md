@@ -1,5 +1,9 @@
 = RubyCAS-Client Changelog
 
+== Version 3.0.0 :: 2018-01-26
+* New functionality
+  * Sessions can now be stored in Memcached.
+
 == Version 2.3.13 :: 2016-03-23
 * New functionality
   * Add the ability to set any top-level session attribute for the fake user.

@@ -45,6 +45,8 @@ module CASClient
           CASClient::Tickets::Storage::LocalDirTicketStore
         when :active_record_ticket_store
           ::ACTIVE_RECORD_TICKET_STORE
+        when :active_model_memcache_ticket_store
+          ::ACTIVE_MODEL_MEMCACHE_TICKET_STORE
         else
           conf[:ticket_store]
       end
