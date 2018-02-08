@@ -80,7 +80,12 @@ After installing RubyCAS-Client as a plugin (see above), add the following to yo
   CASClient::Frameworks::Rails::Filter.configure(
     :cas_base_url => "https://cas.example.foo/"
   )
-  
+
+You have the option of multiple ticket stores, including
++:local_dir_ticket_store+:: Session stored using the local file system
++:active_record_ticket_store+:: Session stored using ActiveRecord store
++:active_model_memcache_ticket_store+:: Session stored using Memcached
+
 (Change the <tt>:cas_base_url</tt> value to your CAS server's base URL; also note that many CAS servers are configured
 with a base URL that looks more like "https://cas.example.foo/cas".)
 
@@ -135,6 +140,26 @@ info under <tt>session[:cas_extra_attributes]</tt>).
 
 An arbitrary Logger instance can be given as the :logger parameter. In the example above we log all CAS activity to a 
 <tt>log/cas.log</tt> file in your Rails app's directory.
+
+==== Memcached storage of Sessions
+
+For Memcached storage set up the configuration with <tt>ticket_store</tt> and <tt>ticket_store_config</tt>
+
+CASClient::Frameworks::Rails::Filter.configure(
+  ...
+    ticket_store: :active_model_memcache_ticket_store,
+    ticket_store_config: {
+      dalli_settings: DALLI_SETTINGS
+    }
+    ...
+)
+
+Set up session storage under<tt>config/initializers/session_store.rb</tt>
+
+Rails.application.config.session_store ActionDispatch::Session::ActiveModelMemcacheStore,
+  cache: ActiveSupport::Cache::DalliStore.new("#{DALLI_SETTINGS.fetch('host', '')}:#{DALLI_SETTINGS.fetch('port', '')}", DALLI_SETTINGS.symbolize_keys.merge(expire_after: session_expiry))
+
+With <tt>ActionDispatch::Session::ActiveModelMemcacheStore</tt> managing sessions through either session_id or service_ticket. <tt>DALLI_SETTINGS</tt> contains the configuration to access the Memcached server.
 
 ==== Re-authenticating on every request (i.e. the "single sign-out problem")
 
