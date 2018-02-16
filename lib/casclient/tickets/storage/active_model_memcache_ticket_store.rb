@@ -38,11 +38,7 @@ module CASClient
 
         def get_session_for_service_ticket(st)
           session_id = read_service_session_lookup(st)
-          if session_id.nil?
-            session = nil
-          else
-            session = MemcacheSessionStore.find_by_session_id(session_id)
-          end
+          session = session_id ? MemcacheSessionStore.find_by_session_id(session_id) : nil
           [session_id, session]
         end
 
@@ -119,7 +115,7 @@ module CASClient
           session = @@dalli.get(session_id)
           # A session is generated immediately without actually logging in, the below line
           # validates that we have a service_ticket so that we can store additional information
-          if session #&& session.key?('service_ticket')
+          if session
             MemcacheSessionStore.new(session)
           else
             return false
