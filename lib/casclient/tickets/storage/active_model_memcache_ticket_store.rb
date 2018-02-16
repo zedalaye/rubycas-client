@@ -36,11 +36,16 @@ module CASClient
           end
         end
 
+        def get_session_for_service_ticket(st)
+          session_id = read_service_session_lookup(st)
+          session = session_id ? MemcacheSessionStore.find_by_session_id(session_id) : nil
+          [session_id, session]
+        end
+
         def read_service_session_lookup(st)
           raise CASException, 'No service_ticket specified.' unless st
           st = st.ticket if st.kind_of? ServiceTicket
-          session = MemcacheSessionStore.find_by_service_ticket(st)
-          session && session.session_id
+          MemcacheSessionStore.find_by_service_ticket(st)
         end
 
         def cleanup_service_session_lookup(st)
@@ -79,7 +84,7 @@ module CASClient
 
       class MemcacheSessionStore
         include ActiveModel
-        attr_accessor :session_id, :service_ticket
+        attr_accessor :session_id, :service_ticket, :data
 
         def initialize(options={})
           options.each do |key, val|
@@ -106,11 +111,11 @@ module CASClient
         end
 
         def self.find_by_session_id(session_id)
-          session_id = "#{@@options['namespace']}:#{session_id}"
+          session_id = "#{namespaced_key(session_id)}"
           session = @@dalli.get(session_id)
           # A session is generated immediately without actually logging in, the below line
           # validates that we have a service_ticket so that we can store additional information
-          if session && session.key?('service_ticket')
+          if session
             MemcacheSessionStore.new(session)
           else
             return false
@@ -118,8 +123,9 @@ module CASClient
         end
 
         def self.find_by_service_ticket(service_ticket)
-          session_id = @@dalli.get("#{@@options['namespace']}:#{service_ticket}")
-          MemcacheSessionStore.find_by_session_id(session_id) if session_id
+          session_id = @@dalli.get("#{namespaced_key(service_ticket)}")
+          session = MemcacheSessionStore.find_by_session_id(session_id) if session_id
+          session.session_id if session
         end
 
         def session_data
@@ -137,8 +143,30 @@ module CASClient
         # service_ticket => session_id
         # session_id => {session_data}
         def save
-          @@dalli.set("#{@@options['namespace']}:#{self.service_ticket}", self.session_id)
-          @@dalli.set("#{@@options['namespace']}:#{self.session_id}", self.session_data)
+          @@dalli.set("#{namespaced_key(self.service_ticket)}", self.session_id)
+          @@dalli.set("#{namespaced_key(self.session_id)}", self.session_data)
+        end
+
+        def destroy
+          @@dalli.delete("#{namespaced_key(self.service_ticket)}")
+          @@dalli.delete("#{namespaced_key(self.session_id)}")
+        end
+
+        alias_method :save!, :save
+
+        # Need to access the namespaced_key method through both class methods as
+        # well as instance methods.
+        # Hence having the same name methods for both class and instance.
+        def self.namespaced_key(key)
+          if @@options['namespace']
+            "#{@@options['namespace']}:#{key}"
+          else
+            key.to_s
+          end
+        end
+
+        def namespaced_key(key)
+          self.class.namespaced_key(key)
         end
       end
 
