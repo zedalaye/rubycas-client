@@ -49,8 +49,7 @@ module CASClient
         def read_service_session_lookup(st)
           raise CASException, 'No service_ticket specified.' unless st
           st = st.ticket if st.kind_of? ServiceTicket
-          session_id = MemcacheSessionStore.find_by_service_ticket(st)
-          session_id || nil
+          MemcacheSessionStore.find_by_service_ticket(st)
         end
 
         def cleanup_service_session_lookup(st)
