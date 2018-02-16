@@ -38,10 +38,10 @@ module CASClient
 
         def get_session_for_service_ticket(st)
           session_id = read_service_session_lookup(st)
-          unless session_id.nil?
-            session = MemcacheSessionStore.find_by_session_id(session_id)
+          if session_id.nil?
+            session = nil
           else
-            log.warn("Couldn't destroy session service ticket #{st} because no corresponding session id could be found.")
+            session = MemcacheSessionStore.find_by_session_id(session_id)
           end
           [session_id, session]
         end
@@ -50,8 +50,7 @@ module CASClient
           raise CASException, 'No service_ticket specified.' unless st
           st = st.ticket if st.kind_of? ServiceTicket
           session_id = MemcacheSessionStore.find_by_service_ticket(st)
-          session = MemcacheSessionStore.find_by_session_id(session_id)
-          session ? session.session_id : nil
+          session_id || nil
         end
 
         def cleanup_service_session_lookup(st)
@@ -167,7 +166,7 @@ module CASClient
           if @@options['namespace']
             "#{@@options['namespace']}:#{key}"
           else
-            "#{key}"
+            key.to_s
           end
         end
 
