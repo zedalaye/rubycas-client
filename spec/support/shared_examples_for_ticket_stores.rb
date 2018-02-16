@@ -55,7 +55,12 @@ shared_examples "a ticket store interacting with sessions" do
       end
       context "the session" do
         it "should be destroyed" do
-          ActiveRecord::SessionStore.session_class.find_by_session_id(session.session_id).should be_nil
+          if subject.instance_of?(CASClient::Tickets::Storage::ActiveModelMemcacheTicketStore)
+            dc = Dalli::Client.new
+            dc.get(session.session_id).should be_nil
+          else
+            ActiveRecord::SessionStore.session_class.find_by_session_id(session.session_id).should be_nil
+          end
         end
       end
       it "should destroy session for the given service ticket" do
@@ -85,7 +90,15 @@ shared_examples "a ticket store" do
   let(:ticket_store) { described_class.new }
   let(:service_url) { "https://www.example.com/cas" }
   let(:session) do
-    ActiveRecord::SessionStore::Session.create!(:session_id => "session#{rand(1000)}", :data => {})
+    if ticket_store.is_a?(CASClient::Tickets::Storage::ActiveModelMemcacheTicketStore)
+      dc = Dalli::Client.new
+      session_id = rand(1000)
+      memcache_data = CASClient::Tickets::Storage::MemcacheSessionStore.new("session_id" => "#{session_id}", "data" => {})
+      dc.set("session#{session_id}", memcache_data)
+      memcache_data
+    else
+      ActiveRecord::SessionStore::Session.create!(:session_id => "session#{rand(1000)}", :data => {})
+    end
   end
   subject { ticket_store }
 
