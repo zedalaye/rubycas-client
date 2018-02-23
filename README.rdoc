@@ -154,7 +154,7 @@ CASClient::Frameworks::Rails::Filter.configure(
     ...
 )
 
-Set up a ActiveModelMemcacheStore to be able to have the session being created and destroyed with the service_tickets under <tt>config/initializers/active_model_memcache_store.rb<tt>; similar to http://github.com/gunark/rubycas-client/tree/master/templates/active_model_memcache_store.rb
+Set up a ActiveModelMemcacheStore to be able to have the session being created and destroyed with the service_tickets under <tt>config/initializers/active_model_memcache_store.rb<tt>; similar to the one such as templates/active_model_memcache_store.rb
 
 Set up session storage under<tt>config/initializers/session_store.rb</tt>
 
