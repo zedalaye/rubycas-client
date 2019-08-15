@@ -1,5 +1,9 @@
 # RubyCAS-Client Changelog
 
+## 3.0.2
+* Other
+  * Stray initializer for memcached sessions leftover in consuming app moved into gem.
+
 ## 3.0.1
 * Bug fixes
   * Use the version declared in `lib/casclient/version.rb` instead of hardcoding it in the gemspec file.
