@@ -44,7 +44,6 @@ module ActionDispatch
         end
         super(env, session_id, options)
       end
-
     end
   end
 end
