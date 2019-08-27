@@ -93,6 +93,20 @@ describe CASClient::Frameworks::Rails::Filter do
        end
     end
 
+
+    context "request is a single signout" do
+       it "should return failure from filter and render text message" do
+        CASClient::Frameworks::Rails::Filter.stub(:unauthorized!) {"bogusresponse"}
+        CASClient::Frameworks::Rails::Filter.stub(:single_sign_out) { true }
+
+        controller = mock_controller_with_session()
+        controller.stub(:params) {{}}
+        expect(controller).to receive(:render).once.with({plain: 'CAS Single-Sign-Out request intercepted.'})
+
+        CASClient::Frameworks::Rails::Filter.filter(controller).should eq(false)
+       end
+    end
+
     context "sent through gateway" do
       context "gatewaying off" do
          it "should return failure from filter" do
