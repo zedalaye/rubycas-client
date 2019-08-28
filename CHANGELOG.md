@@ -1,5 +1,10 @@
 # RubyCAS-Client Changelog
 
+## 3.0.2
+* Other
+  * Stray initializer for memcached sessions leftover in consuming app moved into gem.
+  * Using `render plain:` instead of deprecated `render text:` to support rails 5.
+
 ## 3.0.1
 * Bug fixes
   * Use the version declared in `lib/casclient/version.rb` instead of hardcoding it in the gemspec file.
