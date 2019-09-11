@@ -55,3 +55,14 @@ module ActiveSupport
     end
   end
 end
+
+# Patch Rack 2.0 changes that broke ActionDispatch.
+module ActionDispatch
+  module Session
+    class DalliStore < AbstractStore
+      alias_method :find_session, :get_session
+      alias_method :write_session, :set_session
+      alias_method :delete_session, :destroy_session
+    end
+  end
+end
