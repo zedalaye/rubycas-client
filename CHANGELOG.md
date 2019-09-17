@@ -1,6 +1,6 @@
 # RubyCAS-Client Changelog
 
-## 3.1.0
+## 3.0.3
 * Other
   * support rails 5/rack 2.0. Memcached session support introduced in 3.0.2 updated to work with Rails 5.
 
