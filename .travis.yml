@@ -6,7 +6,7 @@ rvm:
 
 before_install:
   - gem update --system
-  - bundle update --bundler
+  - gem install bundler -v $(tail -n1 Gemfile.lock)
 
 script:
   - bundle exec rspec
