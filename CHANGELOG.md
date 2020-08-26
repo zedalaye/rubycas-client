@@ -1,4 +1,8 @@
 # RubyCAS-Client Changelog
+TODO:
+## 3.0.6
+* Other
+  * Only use session object in Session.session_destroy if its available
 
 ## 3.0.5
 * Other

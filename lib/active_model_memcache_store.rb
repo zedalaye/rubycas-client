@@ -31,13 +31,17 @@ module ActionDispatch
       def destroy_session(env, session_id, options)
         if @pool.exist?(session_id)
           session = @pool.get(session_id)
-          if session.has_key?("service_ticket") && @pool.exist?(session["service_ticket"])
-            begin
-              @pool.delete(session["service_ticket"])
-            rescue Dalli::DalliError
-              Rails.logger.warn("Session::DalliStore#destroy_session: #{$!.message}")
-              raise if @raise_errors
+          if session.present?
+            if session.has_key?("service_ticket") && @pool.exist?(session["service_ticket"])
+              begin
+                @pool.delete(session["service_ticket"])
+              rescue Dalli::DalliError
+                Rails.logger.warn("Session::DalliStore#destroy_session: #{$!.message}")
+                raise if @raise_errors
+              end
             end
+          else
+            Rails.logger.info("Session::ActiveModelMemcacheStore#destroy_session: session is null: #{session_id}")
           end
         end
         super(env, session_id, options)
