@@ -1,5 +1,9 @@
 # RubyCAS-Client Changelog
 
+## 3.0.6
+* Other
+  * Only use session object in Session.session_destroy if its available
+
 ## 3.0.5
 * Other
   * Use controller.request instead of controller to set `.env` value for rack. Rails 5.1+ change.
