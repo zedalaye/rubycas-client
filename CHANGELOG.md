@@ -1,5 +1,9 @@
 # RubyCAS-Client Changelog
 
+## 3.0.7
+* Other
+  * Fix log issue where session lookups were being performed with null keys.
+
 ## 3.0.6
 * Other
   * Only use session object in Session.session_destroy if its available
