@@ -41,7 +41,7 @@ module ActionDispatch
               end
             else
               message = session.has_key?('service_ticket') ? "Service ticket key present, @pool.exist?: #{@pool.exist?(session['service_ticket'])}" : "Service ticket key is nil."
-              CASClient::LoggerWrapper.new.warn("Session::ActiveModelMemcacheStore#destroy_session: #{message}");
+              CASClient::LoggerWrapper.new.warn("Session::ActiveModelMemcacheStore#destroy_session: [SESSION #{session_id}] #{message}");
             end
           else
             CASClient::LoggerWrapper.new.warn("Session::ActiveModelMemcacheStore#destroy_session: the retrieved pool session for session_id #{session_id} is nil");
