@@ -42,7 +42,8 @@ module ActionDispatch
                 raise if @raise_errors
               end
             else
-              CASClient::LoggerWrapper.new.warn("Session::ActiveModelMemcacheStore#destroy_session: Session #{session_id} has_key?: #{session.has_key?('service_ticket')}, @pool.exist?: #{@pool.exist?(session['service_ticket'])}");
+              message = session.has_key?('service_ticket') ? "Service ticket key present, @pool.exist?: #{@pool.exist?(session['service_ticket'])}" : "Service ticket key is nil."
+              CASClient::LoggerWrapper.new.warn("Session::ActiveModelMemcacheStore#destroy_session: #{message}");
             end
           else
             CASClient::LoggerWrapper.new.warn("Session::ActiveModelMemcacheStore#destroy_session: the retrieved pool session for session_id #{session_id} is nil");
