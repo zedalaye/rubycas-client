@@ -29,7 +29,7 @@ describe ActionDispatch::Session::ActiveModelMemcacheStore do
       allow(CASClient::LoggerWrapper).to receive(:new).and_return(logger)
       allow_any_instance_of(ActiveSupport::Cache::DalliStore).to receive(:get).and_return( { "service_ticket" => "12345" } )
       allow_any_instance_of(ActiveSupport::Cache::DalliStore).to receive(:exist?).and_return(true, false)
-      expect(logger).to receive(:warn).with("Session::ActiveModelMemcacheStore#destroy_session: Session  12345 has_key?: true, @pool.exist?: false")
+      expect(logger).to receive(:warn).with("Session::ActiveModelMemcacheStore#destroy_session: [SESSION 12345] Service ticket key present, @pool.exist?: false")
       expect { subject.destroy_session '','12345', {} }.not_to raise_error
     end
 
