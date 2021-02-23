@@ -8,6 +8,7 @@ group :development do
   gem 'rake', '~> 0.9'
   gem 'rspec', '~> 2.8'
   gem 'simplecov', '~> 0.5', require: false
+  gem 'redis', '>= 3.3.1'
 
   platforms :ruby do
     gem 'sqlite3', '~> 1.3'
