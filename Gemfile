@@ -9,6 +9,8 @@ group :development do
   gem 'rspec', '~> 2.8'
   gem 'simplecov', '~> 0.5', require: false
   gem 'redis', '>= 3.3.1'
+  gem 'redis-rails'
+  gem 'redis-actionpack'
 
   platforms :ruby do
     gem 'sqlite3', '~> 1.3'
