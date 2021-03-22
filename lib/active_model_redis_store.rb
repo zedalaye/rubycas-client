@@ -17,29 +17,33 @@ module ActionDispatch
     class ActiveModelRedisStore < ActiveSupport::Cache::RedisStore
 
       def set_session(env, sid, session_data, options = nil)
-        if @pool.exist?(sid)
-          session = @pool.get(sid)
-          # Copy session_id and service_ticket into the session_data
-          %w(session_id service_ticket).each { |key| session_data[key] = session[key] if session[key] }
+        expiry = get_expiry(env, options)
+        if expiry
+          redis.setex(prefixed(sid), expiry, encode(session_data))
+        else
+          redis.set(prefixed(sid), encode(session_data))
         end
-        super(env, sid, session_data, options)
+        sid
+      rescue Errno::ECONNREFUSED, Redis::CannotConnectError => e
+        on_redis_down.call(e, env, sid) if on_redis_down
+        false
       end
+      alias write_session set_session
 
       # The service ticket is also being stored in Redis in the form -
       # service_ticket => session_id
       # session_id => {session_data}
       # Need to ensure that when a session is being destroyed - we also clean up the service-ticket
       # related data prior to letting the session be destroyed.
-      def destroy_session(env, session_id, options)
+      def delete_matched(matcher, options = nil)
         if @pool.exist?(session_id)
           session = @pool.get(session_id)
           if session.present?
             if session.has_key?("service_ticket") && @pool.exist?(session["service_ticket"])
               begin
                 @pool.delete(session["service_ticket"])
-              rescue Redis::RedisError
-                CASClient::LoggerWrapper.new.warn("Session::RedisStore#destroy_session: #{$!.message}");
-                raise if @raise_errors
+              rescue Errno::ECONNREFUSED
+                CASClient::LoggerWrapper.new.warn("Session::RedisStore#delete_matched: #{$!.message}");
               end
             else
               message = session.has_key?('service_ticket') ? "Service ticket key present, @pool.exist?: #{@pool.exist?(session['service_ticket'])}" : "Service ticket key is nil."

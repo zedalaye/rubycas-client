@@ -1,12 +1,22 @@
 require 'spec_helper'
 require 'active_model_redis_store'
 require 'redis'
+require 'redis-store'
 
 describe ActionDispatch::Session::ActiveModelRedisStore do
 
   describe 'session_destroy' do
 
     pool = ActionDispatch::Session::ActiveModelRedisStore.new nil, {
+        :namespace => nil,
+        :compress => true,
+        :compress_threshold => 1.kilobyte,
+        :expires_in => nil,
+        :race_condition_ttl => nil,
+        :error_handler => "DEFAULT_ERROR_HANDLER"
+
+
+        }
         :cache => ActiveSupport::Cache::RedisStore.new("localhost:70"),
         :key => "_session_id",
         :secret => "SESSION_SECRET_KEY",
