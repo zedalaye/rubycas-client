@@ -14,28 +14,23 @@ module ActionDispatch
     # * <tt>cache</tt>         - The cache to use. If it is not specified, <tt>Rails.cache</tt> will be used.
     # * <tt>expire_after</tt>  - The length of time a session will be stored before automatically expiring.
     #   By default, the <tt>:expires_in</tt> option of the cache is used.
-    class ActiveModelRedisStore < ActiveSupport::Cache::RedisStore
+    class ActiveModelRedisStore < ActionDispatch::Session::RedisStore
 
-      def set_session(env, sid, session_data, options = nil)
-        expiry = get_expiry(env, options)
-        if expiry
-          redis.setex(prefixed(sid), expiry, encode(session_data))
-        else
-          redis.set(prefixed(sid), encode(session_data))
+      def set_session(env, session_id, new_session, options)
+        if @pool.exist?(sid)
+          session = @pool.get(sid)
+          # Copy session_id and service_ticket into the session_data
+          %w(session_id service_ticket).each { |key| session_data[key] = session[key] if session[key] }
         end
-        sid
-      rescue Errno::ECONNREFUSED, Redis::CannotConnectError => e
-        on_redis_down.call(e, env, sid) if on_redis_down
-        false
+        super(env, session_id, new_session, options)
       end
-      alias write_session set_session
 
       # The service ticket is also being stored in Redis in the form -
       # service_ticket => session_id
       # session_id => {session_data}
       # Need to ensure that when a session is being destroyed - we also clean up the service-ticket
       # related data prior to letting the session be destroyed.
-      def delete_matched(matcher, options = nil)
+      def destroy_session(env, session_id, options)
         if @pool.exist?(session_id)
           session = @pool.get(session_id)
           if session.present?
@@ -56,10 +51,10 @@ module ActionDispatch
         super(env, session_id, options)
       end
 
-      # # Patch Rack 2.0 changes that broke ActionDispatch.
-      # alias_method :find_session, :get_session
-      # alias_method :write_session, :set_session
-      # alias_method :delete_session, :destroy_session
+      # Patch Rack 2.0 changes that broke ActionDispatch.
+      alias_method :find_session, :get_session
+      alias_method :write_session, :set_session
+      alias_method :delete_session, :destroy_session
 
     end
   end
@@ -68,8 +63,6 @@ end
 module ActiveSupport
   module Cache
     class RedisCacheStore
-      # alias_method :get, :read_multi
-      # alias_method :set, :write
     end
   end
 end

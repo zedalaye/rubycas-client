@@ -7,7 +7,7 @@ describe ActionDispatch::Session::ActiveModelRedisStore do
 
   describe 'session_destroy' do
 
-    pool = ActionDispatch::Session::ActiveModelRedisStore.new nil, {
+    pool = ActiveSupport::Cache::ActiveModelRedisStore.new nil, {
         :namespace => nil,
         :compress => true,
         :compress_threshold => 1.kilobyte,
