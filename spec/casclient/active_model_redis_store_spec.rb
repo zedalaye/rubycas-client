@@ -7,7 +7,7 @@ describe ActionDispatch::Session::ActiveModelRedisStore do
 
   describe 'session_destroy' do
 
-    pool = ActiveSupport::Cache::ActiveModelRedisStore.new nil, {
+    pool = ActiveSupport::Session::ActiveModelRedisStore.new nil, {
         :namespace => nil,
         :compress => true,
         :compress_threshold => 1.kilobyte,
@@ -17,12 +17,6 @@ describe ActionDispatch::Session::ActiveModelRedisStore do
 
 
         }
-        :cache => ActiveSupport::Cache::RedisStore.new("localhost:70"),
-        :key => "_session_id",
-        :secret => "SESSION_SECRET_KEY",
-        :session_id => '12345',
-        :raise_errors => true,
-        :secure => false }
 
     subject { pool }
 
