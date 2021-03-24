@@ -16,13 +16,17 @@ module ActionDispatch
     #   By default, the <tt>:expires_in</tt> option of the cache is used.
     class ActiveModelRedisStore < ActionDispatch::Session::RedisStore
 
-      def set_session(env, session_id, new_session, options)
-        if @pool.exist?(sid)
-          session = @pool.get(sid)
+      def get_session(env, sid)
+        super(env,sid)
+      end
+      
+      def set_session(env, sid, new_session, options)
+        session = self.get_session(env,sid)[1]
+        unless session.nil?
           # Copy session_id and service_ticket into the session_data
-          %w(session_id service_ticket).each { |key| session_data[key] = session[key] if session[key] }
+          %w(sid service_ticket).each { |key| new_session[key] = session[key] if session[key] }
         end
-        super(env, session_id, new_session, options)
+        super(env, sid, new_session, options)
       end
 
       # The service ticket is also being stored in Redis in the form -
