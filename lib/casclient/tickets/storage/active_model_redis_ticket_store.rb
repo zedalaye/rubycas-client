@@ -207,7 +207,7 @@ module CASClient
       class RedisPgtiou
         include ActiveModel
         attr_accessor :pgt_iou, :pgt_id
-        
+
         def initialize(options={})
           @pgt_iou = options[:pgt_iou]
           @pgt_id = options[:pgt_id]
