@@ -1,15 +1,17 @@
+
+require 'casclient/frameworks/rails/filter'
 require 'redis'
 require 'redis-store'
 require 'redis-activesupport'
 require 'redis-actionpack'
+
 module CASClient
   module Tickets
     module Storage
 
       class ActiveModelRedisTicketStore < AbstractTicketStore
         def initialize(config={})
-          config ||= {}
-          RedisSessionStore.client(config) if config
+          RedisSessionStore.setup_client(config || {})
         end
 
         def store_service_session_lookup(st, controller)
@@ -90,6 +92,10 @@ module CASClient
         include ActiveModel
         attr_accessor :session_id, :service_ticket, :data
 
+        class << self
+          attr_accessor :client
+        end
+
         def initialize(options={})
           options.each do |key, val|
             self.instance_variable_set("@#{key}", val)
@@ -105,18 +111,37 @@ module CASClient
           self.instance_variable_set("@#{key}", value)
         end
 
-        def self.client(config)
-          redis_url = config && config[:redis_settings] && "#{config[:redis_settings]['host']}:#{config[:redis_settings]['port']}" || 'localhost:11211'
-          options = config[:redis_settings].clone if config.has_key?(:redisi_settings)
-          options.delete("host") if options && options.has_key?("host")
-          options.delete("port") if options && options.has_key?("port")
-          @@options = options || {}
-          @@redis ||= Redis.new(redis_url, @@options)
-      end
+        def self.setup_client(config)
+          @client ||= begin
+            settings = config[:redis_settings] || {}
+            @namespace = settings['namespace']
+            host = settings['host'] || 'localhost'
+            protocol = settings['secure'] ? 'rediss' : 'redis'
+            port = settings['port'] || '6379'
+            db = settings['db'] || '0'
+
+            Redis.new(url: "#{protocol}://#{host}:#{port}/#{db}")
+          end
+        end
+
+      #   def self.client(config)
+      #     redis_url = config && config[:redis_settings] && "#{config[:redis_settings]['host']}:#{config[:redis_settings]['port']}" || 'localhost:11211'
+      #     options = config[:redis_settings].clone if config.has_key?(:redis_settings)
+      #     options.delete("host") if options && options.has_key?("host")
+      #     options.delete("port") if options && options.has_key?("port")
+      #     @@options = options || {}
+      #     @@redis ||= Redis.new(redis_url, @@options)
+      # end
 
         def self.find_by_session_id(session_id)
           session_id = "#{namespaced_key(session_id)}"
-          session = @@redis.get(session_id)
+          session = @client.get(session_id)
+
+          # Unlike Memcached, Redis .get returns a serialized hash...
+          # Alternately, data could be saved as redis native hash data using redis.hmset and retrieved with .hgetall
+          # However, some values may themselves be hashes which would then be stringified.
+          session = JSON.parse(session) if session.is_a? String
+
           # A session is generated immediately without actually logging in, the below line
           # validates that we have a service_ticket so that we can store additional information
           if session
@@ -127,7 +152,7 @@ module CASClient
         end
 
         def self.find_by_service_ticket(service_ticket)
-          session_id = @@redis.get("#{namespaced_key(service_ticket)}")
+          session_id = @client.get("#{namespaced_key(service_ticket)}")
           session = RedisSessionStore.find_by_session_id(session_id) if session_id
           session.session_id if session
         end
@@ -136,6 +161,10 @@ module CASClient
           data = {}
           self.instance_variables.each{|key| data[key.to_s.sub(/\A@/, '')] = self[key.to_s.sub(/\A@/, '')]}
           data
+        end
+
+        def client
+          self.class.client
         end
 
         # As Redis is a key value store we are storing the session in the form of
@@ -147,13 +176,14 @@ module CASClient
         # service_ticket => session_id
         # session_id => {session_data}
         def save
-          @@redis.set("#{namespaced_key(self.service_ticket)}", self.session_id)
-          @@redis.set("#{namespaced_key(self.session_id)}", self.session_data)
+          client.set(namespaced_key(service_ticket), session_id)
+          # It's easiest to convert data to json, then parse when reading above in .find_by_session_id.
+          client.set(namespaced_key(session_id), session_data.to_json)
         end
 
         def destroy
-          @@redis.delete("#{namespaced_key(self.service_ticket)}")
-          @@redis.delete("#{namespaced_key(self.session_id)}")
+          client.del(namespaced_key(service_ticket))
+          client.del(namespaced_key(session_id))
         end
 
         alias_method :save!, :save
@@ -162,8 +192,8 @@ module CASClient
         # well as instance methods.
         # Hence having the same name methods for both class and instance.
         def self.namespaced_key(key)
-          if @@options['namespace']
-            "#{@@options['namespace']}:#{key}"
+          if @namespace
+            "#{@namespace}:#{key}"
           else
             key.to_s
           end
@@ -174,33 +204,31 @@ module CASClient
         end
       end
 
-      class Pgtiou
+      class RedisPgtiou
         include ActiveModel
         attr_accessor :pgt_iou, :pgt_id
-
-        @@redis = Redis.new
-
+        
         def initialize(options={})
           @pgt_iou = options[:pgt_iou]
           @pgt_id = options[:pgt_id]
         end
 
         def self.find_by_pgt_iou(pgt_iou)
-          pgtiou = @@redis.get(pgt_iou)
-          Pgtiou.new(pgtiou) if pgtiou
+          pgtiou = RedisSessionStore.client.get(pgt_iou)
+          RedisPgtiou.new(pgtiou) if pgtiou
         end
 
         def self.create(options)
-          pgtiou = Pgtiou.new(options)
-          @@redis.set(pgtiou.pgt_iou, pgtiou.session_data)
+          pgtiou = RedisPgtiou.new(options)
+          RedisSessionStore.client.set(pgtiou.pgt_iou, pgtiou.session_data)
         end
 
         def session_data
-          {pgt_iou: self.pgt_iou, pgt_id: self.pgt_id}
+          {pgt_iou: pgt_iou, pgt_id: pgt_id}
         end
 
         def destroy
-          @@redis.delete(self.pgt_iou)
+          RedisSessionStore.client.delete(pgt_iou)
         end
       end
     end
