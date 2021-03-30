@@ -19,7 +19,7 @@ module ActionDispatch
       def get_session(env, sid)
         super(env,sid)
       end
-      
+
       def set_session(env, sid, new_session, options)
         session = self.get_session(env,sid)[1]
         unless session.nil?
@@ -35,17 +35,17 @@ module ActionDispatch
       # Need to ensure that when a session is being destroyed - we also clean up the service-ticket
       # related data prior to letting the session be destroyed.
       def destroy_session(env, session_id, options)
-        if @pool.exist?(session_id)
-          session = @pool.get(session_id)
+        unless @pool.nil?(session_id)
+          session = self.get_session(env,session_id)[1]
           if session.present?
-            if session.has_key?("service_ticket") && @pool.exist?(session["service_ticket"])
+            if session.has_key?("service_ticket") && !@pool.nil?(session["service_ticket"])
               begin
-                @pool.delete(session["service_ticket"])
+                @pool.del(session["service_ticket"])
               rescue Errno::ECONNREFUSED
                 CASClient::LoggerWrapper.new.warn("Session::RedisStore#delete_matched: #{$!.message}");
               end
             else
-              message = session.has_key?('service_ticket') ? "Service ticket key present, @pool.exist?: #{@pool.exist?(session['service_ticket'])}" : "Service ticket key is nil."
+              message = session.has_key?('service_ticket') ? "Service ticket key present, @pool.exist?: #{!@pool.nil?(session['service_ticket'])}" : "Service ticket key is nil."
               CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: [SESSION #{session_id}] #{message}");
             end
           else
