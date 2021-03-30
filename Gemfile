@@ -8,8 +8,8 @@ group :development do
   gem 'rake', '~> 0.9'
   gem 'rspec', '~> 2.8'
   gem 'redis', '4.2.5'
-  gem 'redis-actionpack', '5.1.0'
-  gem 'redis-rails', '5.0.2'
+  gem 'redis-actionpack', '4.0.1'
+  gem 'redis-rails', '4.0.0'
   gem 'simplecov', '~> 0.5', require: false
   platforms :ruby do
     gem 'sqlite3', '~> 1.3'

@@ -1,4 +1,4 @@
-require 'action_dispatch/middleware/session/abstract_store'
+
 require 'redis'
 require 'redis-store'
 require 'redis-activesupport'
