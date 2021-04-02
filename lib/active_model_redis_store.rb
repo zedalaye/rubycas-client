@@ -1,4 +1,3 @@
-
 require 'redis'
 require 'redis-store'
 require 'redis-activesupport'
