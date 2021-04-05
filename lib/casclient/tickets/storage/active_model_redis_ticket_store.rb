@@ -118,10 +118,10 @@ module CASClient
 
         def self.setup_client(config)
           @client ||= begin
-            settings = config[:redis_settings] || {}
-            @namespace = settings['namespace']
+            settings = config[:servers] || {}
+            @namespace = config[:namespace]
+            protocol = config['secure'] ? 'rediss' : 'redis'
             host = settings['host'] || 'localhost'
-            protocol = settings['secure'] ? 'rediss' : 'redis'
             port = settings['port'] || '6379'
             db = settings['db'] || '0'
 
