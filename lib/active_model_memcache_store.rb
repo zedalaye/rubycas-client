@@ -29,6 +29,24 @@ module ActionDispatch
       # Need to ensure that when a session is being destroyed - we also clean up the service-ticket
       # related data prior to letting the session be destroyed.
       def destroy_session(env, session_id, options)
+        if @pool.exist?(session_id)
+          session = @pool.get(session_id)
+          if session.present?
+            if session.has_key?("service_ticket") && @pool.exist?(session["service_ticket"])
+              begin
+                @pool.delete(session["service_ticket"])
+              rescue Dalli::DalliError
+                CASClient::LoggerWrapper.new.warn("Session::DalliStore#destroy_session: #{$!.message}");
+                raise if @raise_errors
+              end
+            else
+              message = session.has_key?('service_ticket') ? "Service ticket key present, @pool.exist?: #{@pool.exist?(session['service_ticket'])}" : "Service ticket key is nil."
+              CASClient::LoggerWrapper.new.warn("Session::ActiveModelMemcacheStore#destroy_session: [SESSION #{session_id}] #{message}");
+            end
+          else
+            CASClient::LoggerWrapper.new.warn("Session::ActiveModelMemcacheStore#destroy_session: the retrieved pool session for session_id #{session_id} is nil");
+          end
+        end
         super(env, session_id, options)
       end
 
