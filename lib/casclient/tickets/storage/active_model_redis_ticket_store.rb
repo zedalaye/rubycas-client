@@ -118,14 +118,7 @@ module CASClient
 
         def self.setup_client(config)
           @client ||= begin
-            settings = config[:servers] || {}
-            @namespace = config[:namespace]
-            protocol = config[:secure] ? 'rediss' : 'redis'
-            host = settings[:host] || 'localhost'
-            port = settings[:port] || '6379'
-            db = settings[:db] || '0'
-
-            ActionDispatch::Session::ActiveModelRedisStore.new(url: "#{protocol}://#{host}:#{port}/#{db}", serializer: nil )
+            ActionDispatch::Session::ActiveModelRedisStore.new(config ,config)
           end
         end
 

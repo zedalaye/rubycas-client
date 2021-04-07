@@ -15,6 +15,12 @@ module ActionDispatch
     #   By default, the <tt>:expires_in</tt> option of the cache is used.
     class ActiveModelRedisStore < ActionDispatch::Session::RedisStore
 
+      def initialize(app, options = {} )
+        options = options.dup
+        options[:redis_server] ||= options[:servers]
+        super
+      end
+
       def get_session(env, sid)
         super(env,sid)
       end
