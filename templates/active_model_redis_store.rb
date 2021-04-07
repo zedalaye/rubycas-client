@@ -35,23 +35,6 @@ module ActionDispatch
       # Need to ensure that when a session is being destroyed - we also clean up the service-ticket
       # related data prior to letting the session be destroyed.
       def destroy_session(env, session_id, options)
-        unless @pool.nil?(session_id)
-          session = self.get_session(env,session_id)[1]
-          if session.present?
-            if session.has_key?("service_ticket") && !@pool.nil?(session["service_ticket"])
-              begin
-                @pool.del(session["service_ticket"])
-              rescue Errno::ECONNREFUSED
-                CASClient::LoggerWrapper.new.warn("Session::RedisStore#delete_matched: #{$!.message}");
-              end
-            else
-              message = session.has_key?('service_ticket') ? "Service ticket key present, @pool.exist?: #{!@pool.nil?(session['service_ticket'])}" : "Service ticket key is nil."
-              CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: [SESSION #{session_id}] #{message}");
-            end
-          else
-            CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: the retrieved pool session for session_id #{session_id} is nil");
-          end
-        end
         super(env, session_id, options)
       end
 
