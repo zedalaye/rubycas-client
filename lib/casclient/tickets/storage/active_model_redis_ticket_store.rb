@@ -156,7 +156,7 @@ module CASClient
 
 
         def self.find_by_service_ticket(service_ticket)
-          session_id = @client.get(@env, "#{namespaced_key(service_ticket)}")
+          session_id = @client.get_session(@env, "#{namespaced_key(service_ticket)}")
           session = RedisSessionStore.find_by_session_id(session_id) if session_id
           session.session_id if session
         end
@@ -186,8 +186,8 @@ module CASClient
         end
 
         def destroy
-          @client.del(@env, namespaced_key(service_ticket))
-          @client.del(@env, namespaced_key(session_id))
+          @client.destroy_session(@env, namespaced_key(service_ticket))
+          @client.destroy_session(@env, namespaced_key(session_id))
         end
 
         alias_method :save!, :save
@@ -218,13 +218,13 @@ module CASClient
         end
 
         def self.find_by_pgt_iou(pgt_iou)
-          pgtiou = RedisSessionStore.client.get(pgt_iou)
+          pgtiou = RedisSessionStore.client.get_session(RedisSessionStore.env,pgt_iou)
           RedisPgtiou.new(pgtiou) if pgtiou
         end
 
         def self.create(options)
           pgtiou = RedisPgtiou.new(options)
-          RedisSessionStore.client.set(pgtiou.pgt_iou, pgtiou.session_data)
+          RedisSessionStore.client.set_session(RedisSessionStore.env, pgtiou.pgt_iou, pgtiou.session_data)
         end
 
         def session_data
@@ -232,7 +232,7 @@ module CASClient
         end
 
         def destroy
-          RedisSessionStore.client.delete(pgt_iou)
+          RedisSessionStore.client.destroy_session(RedisSessionStore.env,pgt_iou)
         end
       end
     end
