@@ -2,13 +2,13 @@ module ActiveModelRedisTicketStoreHelpers
   class << self
     def setup_redis_store
       @redis_mock_store = {}
-      Dalli::Client.any_instance.stub(:set) do |key, value|
+      ActionDispatch::Session::ActiveModelRedisStore.any_instance.stub(:set_session) do |key, value|
         @redis_mock_store[key] = value
       end
-      Dalli::Client.any_instance.stub(:get) do |key|
+      ActionDispatch::Session::ActiveModelRedisStore.any_instance.stub(:get_sessiom) do |key|
         @redis_mock_store[key]
       end
-      Dalli::Client.any_instance.stub(:delete) do |key|
+      ActionDispatch::Session::ActiveModelRedisStore.any_instance.stub(:destroy_session) do |key|
         @redis_mock_store.delete(key)
         @redis_mock_store
       end
