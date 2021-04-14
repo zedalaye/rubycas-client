@@ -177,13 +177,18 @@ CASClient::Frameworks::Rails::Filter.configure(
     ...
 )
 
-Set up a ActiveModelRedisStore to be able to have the session being created and destroyed with the service_tickets under <tt>config/initializers/active_model_redis_store.rb<tt>; similar to the one such as templates/active_model_redis_store.rb
+Set up an ActiveModelRedisStore to be able to have the session be created and destroyed with the service_tickets under <tt>config/initializers/active_model_redis_store.rb<tt>; similar to the one in templates/active_model_redis_store.rb
 
-Set up session storage under<tt>config/initializers/session_store.rb</tt>
+Set up session storage under <tt>config/initializers/session_store.rb</tt>
 
 Rails.application.config.session_store ActionDispatch::Session::ActiveModelRedisStore,
-  cache: ActiveSupport::Cache::RedisCacheStore.new("#{REDIS_SETTINGS.fetch('host', '')}:#{REDIS_SETTINGS.fetch('port', '')}", REDIS_SETTINGS.symbolize_keys.merge(expire_after: session_expiry))
-
+                                           redis_server: { host: REDIS_SETTINGS.fetch('host', ''), port: REDIS_SETTINGS.fetch('port', ''), db: REDIS_SETTINGS.fetch('db', '')},
+                                           key: "_session_id",
+                                           namespace: REDIS_SETTINGS.fetch('namespace', ''),
+                                           expire_after:session_expiry,
+                                           secret: SESSION_SECRET_KEY,
+                                           secure: Rails.env.production?
+                                           
 With <tt>ActionDispatch::Session::ActiveModelRedisStore</tt> managing sessions through either session_id or service_ticket. <tt>"REDIS_SETTINGS</tt> contains the configuration to access the Redis server.
 
 
