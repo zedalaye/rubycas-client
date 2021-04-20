@@ -5,7 +5,7 @@ module ActiveModelRedisTicketStoreHelpers
       ActionDispatch::Session::ActiveModelRedisStore.any_instance.stub(:set_session) do |key, value|
         @redis_mock_store[key] = value
       end
-      ActionDispatch::Session::ActiveModelRedisStore.any_instance.stub(:get_sessiom) do |key|
+      ActionDispatch::Session::ActiveModelRedisStore.any_instance.stub(:get_session) do |key|
         @redis_mock_store[key]
       end
       ActionDispatch::Session::ActiveModelRedisStore.any_instance.stub(:destroy_session) do |key|
