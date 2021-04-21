@@ -2,6 +2,9 @@ require 'redis'
 require 'redis-store'
 require 'redis-activesupport'
 require 'redis-actionpack'
+require 'action_dispatch/middleware/session/redis_store'
+require 'active_support/cache/redis_store'
+require 'redis-rack'
 
 module ActionDispatch
   module Session
@@ -42,7 +45,7 @@ module ActionDispatch
       def destroy_session(env, session_id, options)
         begin
           with_lock(env, [nil, {}]) do
-            last_st = if sesh = get_session_with_fallback(session_id)
+            last_st = if (sesh = Rack::Session::Pool.get_session_with_fallback(session_id))
                         sesh['cas_last_valid_ticket']
                       end
 
