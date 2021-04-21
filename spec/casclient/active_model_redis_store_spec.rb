@@ -8,7 +8,7 @@ describe ActionDispatch::Session::ActiveModelRedisStore do
   describe 'session_destroy' do
 
     redis = ActionDispatch::Session::ActiveModelRedisStore.new nil, {
-                                                                   :redis_server => { host: 'localhost', port: 6380 , db: 0 } ,
+                                                                   :redis_server => { host: 'localhost', port: 6379 , db: 0 } ,
                                                                    :key => "_session_id",
                                                                    :namespace => 'imedidata'
     }
