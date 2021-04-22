@@ -35,7 +35,28 @@ module ActionDispatch
       # Need to ensure that when a session is being destroyed - we also clean up the service-ticket
       # related data prior to letting the session be destroyed.
       def destroy_session(env, session_id, options)
-        super(env, session_id, options)
+        session = self.get_session(env,session_id)[1]
+        if session.present?
+          begin
+            with_lock(env, [nil, {}]) do
+              last_st = if sesh = get_session_with_fallback(session_id)
+                          sesh['cas_last_valid_ticket']
+                        end
+
+              with do |c|
+                Rails.logger.info "deleting service-ticket with key #{"#{options[:namespace]}:#{last_st}"}"
+                [last_st, session_id].each do |t|
+                  c.del([options[:namespace], t].compact.join(':'))
+                end
+              end
+            end
+          rescue => e
+            Rails.logger.info "Error cleaning up cas cache data: #{e}"
+          end
+          super(env, session_id, options)
+        else
+          CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: the retrieved pool session for session_id #{session_id} is nil");
+        end
       end
 
       # Patch Rack 2.0 changes that broke ActionDispatch.
