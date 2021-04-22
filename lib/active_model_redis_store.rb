@@ -2,6 +2,9 @@ require 'redis'
 require 'redis-store'
 require 'redis-activesupport'
 require 'redis-actionpack'
+require 'action_dispatch/middleware/session/redis_store'
+require 'active_support/cache/redis_store'
+require 'redis-rack'
 
 module ActionDispatch
   module Session
