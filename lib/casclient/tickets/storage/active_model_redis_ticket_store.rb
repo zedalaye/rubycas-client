@@ -117,7 +117,7 @@ module CASClient
         end
 
         def self.setup_client(config)
-          @client ||= begin
+          @@client ||= begin
             ActionDispatch::Session::ActiveModelRedisStore.new(config ,config)
           end
         end
@@ -133,7 +133,7 @@ module CASClient
 
         def self.find_by_session_id(session_id)
           session_id = "#{namespaced_key(session_id)}"
-          session = @client.get_session(@env, session_id)[1]
+          session = @@client.get_session(@env, session_id)[1]
 
           # Unlike Memcached, Redis .get returns a serialized hash...
           # Alternately, data could be saved as redis native hash data using redis.hmset and retrieved with .hgetall
@@ -151,12 +151,12 @@ module CASClient
 
         def self.set_session(session_id, new_session)
 
-          session = @client.set_session(@env, session_id,new_session, {})
+          session = @@client.set_session(@env, session_id,new_session, {})
         end
 
 
         def self.find_by_service_ticket(service_ticket)
-          session_id = @client.get_session(@env, "#{namespaced_key(service_ticket)}")
+          session_id = @@client.get_session(@env, "#{namespaced_key(service_ticket)}")
           session = RedisSessionStore.find_by_session_id(session_id) if session_id
           session.session_id if session
         end
@@ -180,14 +180,14 @@ module CASClient
         # service_ticket => session_id
         # session_id => {session_data}
         def save
-          @client.set_session(@env, namespaced_key(service_ticket), session_id)
+          @@client.set_session(@env, namespaced_key(service_ticket), session_id, {})
           # It's easiest to convert data to json, then parse when reading above in .find_by_session_id.
-          @client.set_session(@env, namespaced_key(session_id), session_data.to_json)
+          @@client.set_session(@env, namespaced_key(session_id), session_data.to_json,{})
         end
 
         def destroy
-          @client.destroy_session(@env, namespaced_key(service_ticket))
-          @client.destroy_session(@env, namespaced_key(session_id))
+          @@client.destroy_session(@env, namespaced_key(service_ticket),{})
+          @@client.destroy_session(@env, namespaced_key(session_id),{})
         end
 
         alias_method :save!, :save
