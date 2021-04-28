@@ -1,7 +1,8 @@
 source 'https://rubygems.org'
 
 group :development do
-
+  
+  gem 'activerecord-session_store', '~> 1.1'
   gem 'actionpack', '>= 4.0', require: 'action_pack'
   gem 'database_cleaner', '1.8.5'
   gem 'jeweler', '~> 1.8'

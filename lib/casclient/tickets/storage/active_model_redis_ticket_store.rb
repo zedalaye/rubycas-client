@@ -13,6 +13,7 @@ module CASClient
 
         def initialize(config={})
           RedisSessionStore.setup_client(config || {})
+          RedisPgtiou.setup_client(config || {})
         end
 
         def store_service_session_lookup(st, controller)
@@ -217,22 +218,31 @@ module CASClient
           @pgt_id = options[:pgt_id]
         end
 
+        def self.setup_client(config)
+          @@client ||= begin
+           ActionDispatch::Session::ActiveModelRedisStore.new(config ,config)
+          end
+        end
+
         def self.find_by_pgt_iou(pgt_iou)
-          pgtiou = RedisSessionStore.client.get_session(RedisSessionStore.env,pgt_iou)
-          RedisPgtiou.new(pgtiou) if pgtiou
+          debugger
+          pgtiou = @@client.get_session(RedisSessionStore.env,pgt_iou)[1]
+          redispgtiou =  RedisPgtiou.new(pgtiou) if pgtiou
+
+          return redispgtiou
         end
 
         def self.create(options)
           pgtiou = RedisPgtiou.new(options)
-          RedisSessionStore.client.set_session(RedisSessionStore.env, pgtiou.pgt_iou, pgtiou.session_data)
+          @@client.set_session({}, pgtiou.pgt_iou, pgtiou.session_data, {})
         end
 
         def session_data
-          {pgt_iou: pgt_iou, pgt_id: pgt_id}
+          {pgt_iou: self.pgt_iou, pgt_id: self.pgt_id}
         end
 
         def destroy
-          RedisSessionStore.client.destroy_session(RedisSessionStore.env,pgt_iou)
+          @@client.destroy_session(RedisSessionStore.env,self.pgt_iou,{})
         end
       end
     end
