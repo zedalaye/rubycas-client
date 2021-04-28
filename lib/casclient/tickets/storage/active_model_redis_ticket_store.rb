@@ -225,11 +225,8 @@ module CASClient
         end
 
         def self.find_by_pgt_iou(pgt_iou)
-          debugger
           pgtiou = @@client.get_session(RedisSessionStore.env,pgt_iou)[1]
-          redispgtiou =  RedisPgtiou.new(pgtiou) if pgtiou
-
-          return redispgtiou
+          RedisPgtiou.new(pgtiou) if pgtiou
         end
 
         def self.create(options)

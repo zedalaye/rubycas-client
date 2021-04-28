@@ -99,6 +99,8 @@ shared_examples "a ticket store" do
       end
 
       it "should not return the stored pgt a second time" do
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return(["session_id_1",{:pgt_iou => pgt_iou, :pgt_id=> pgt}],[])
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["session_id_1",{:pgt_iou => pgt_iou, :pgt_id=> pgt}],[])
         subject.retrieve_pgt(pgt_iou).should == pgt
         expect { subject.retrieve_pgt(pgt_iou) }.to raise_exception(CASClient::CASException, /Invalid pgt_iou/)
       end
