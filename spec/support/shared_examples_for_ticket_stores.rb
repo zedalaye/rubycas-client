@@ -22,15 +22,23 @@ shared_examples "a ticket store interacting with sessions" do
   describe "#get_session_for_service_ticket" do
     context "the service ticket is nil" do
       it "should raise CASException" do
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["nonexistant_session", {"session_id" => "ST-id"}])
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["nonexistant_session", {"session_id" => "ST-id"}])
+
         expect { subject.get_session_for_service_ticket(nil) }.to raise_exception(CASClient::CASException, /No service_ticket specified/)
       end
     end
     context "the service ticket is associated with a session" do
       before do
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["nonexistant_session", {"session_id" => "ST-id"}])
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["nonexistant_session", {"session_id" => "ST-id"}])
         subject.store_service_session_lookup(service_ticket, mock_controller_with_session(nil, session))
         session.save!
       end
       it "should return the session_id and session for the given service ticket" do
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["nonexistant_session", {"session_id" => "ST-id"}])
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["nonexistant_session", {"session_id" => "ST-id"}])
+
         result_session_id, result_session = subject.get_session_for_service_ticket(service_ticket)
         result_session_id.should == session.session_id
         result_session.session_id.should == session.session_id
@@ -39,6 +47,9 @@ shared_examples "a ticket store interacting with sessions" do
     end
     context "the service ticket is not associated with a session" do
       it "should return nils if there is no session for the given service ticket" do
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["nonexistant_session", {"session_id" => "ST-id"}])
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["nonexistant_session", {"session_id" => "ST-id"}])
+
         subject.get_session_for_service_ticket(service_ticket).should == [nil, nil]
       end
     end
@@ -52,6 +63,9 @@ shared_examples "a ticket store interacting with sessions" do
     end
     context "the service ticket is associated with a session" do
       before do
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["nonexistant_session", {"session_id" => "ST-id"}])
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["nonexistant_session", {"session_id" => "ST-id"}])
+
         subject.store_service_session_lookup(service_ticket, mock_controller_with_session(nil, session))
         session.save!
         subject.process_single_sign_out(service_ticket)
@@ -62,18 +76,31 @@ shared_examples "a ticket store interacting with sessions" do
             dc = Dalli::Client.new
             dc.get(session.session_id).should be_nil
           elsif subject.instance_of?(CASClient::Tickets::Storage::ActiveModelRedisTicketStore)
-
+            dc = ActionDispatch::Session::ActiveModelRedisStore.new nil, {
+                :cache => ActiveSupport::Cache::RedisStore.new,
+                :redis_server => { host: '127.0.0.1', port: 6379 , db: 0 } ,
+                :key => "_session_id",
+                :raise_errors => true,
+                :secure => false
+            }
+            dc.get_session({}, session_id,{}).should be_nil
           else
             ActiveRecord::SessionStore.session_class.find_by_session_id(session.session_id).should be_nil
           end
         end
       end
       it "should destroy session for the given service ticket" do
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["nonexistant_session", {"session_id" => "ST-id"}])
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["nonexistant_session", {"session_id" => "ST-id"}])
+
         subject.process_single_sign_out(service_ticket)
       end
     end
     context "the service ticket is not associated with a session" do
       it "should run without error if there is no session for the given service ticket" do
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["nonexistant_session", {"session_id" => "ST-id"}])
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["nonexistant_session", {"session_id" => "ST-id"}])
+
         expect { subject.process_single_sign_out(service_ticket) }.to_not raise_error
       end
     end
@@ -82,10 +109,16 @@ shared_examples "a ticket store interacting with sessions" do
   describe "#cleanup_service_session_lookup" do
     context "the service ticket is nil" do
       it "should raise CASException" do
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["nonexistant_session", {"session_id" => "ST-id"}])
+        allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["nonexistant_session", {"session_id" => "ST-id"}])
+
         expect { subject.cleanup_service_session_lookup(nil) }.to raise_exception(CASClient::CASException, /No service_ticket specified/)
       end
     end
     it "should run without error" do
+      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["nonexistant_session", {"session_id" => "ST-id"}])
+      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["nonexistant_session", {"session_id" => "ST-id"}])
+
       expect { subject.cleanup_service_session_lookup(service_ticket) }.to_not raise_exception
     end
   end
