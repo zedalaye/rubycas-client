@@ -19,6 +19,76 @@ shared_examples "a ticket store interacting with sessions" do
     end
   end
 
+  describe "#get_session_for_service_ticket" do
+    context "the service ticket is nil" do
+      it "should raise CASException" do
+        expect { subject.get_session_for_service_ticket(nil) }.to raise_exception(CASClient::CASException, /No service_ticket specified/)
+      end
+    end
+    context "the service ticket is associated with a session" do
+      before do
+        subject.store_service_session_lookup(service_ticket, mock_controller_with_session(nil, session))
+        session.save!
+      end
+      it "should return the session_id and session for the given service ticket" do
+        result_session_id, result_session = subject.get_session_for_service_ticket(service_ticket)
+        result_session_id.should == session.session_id
+        result_session.session_id.should == session.session_id
+        result_session.data.should == session.data
+      end
+    end
+    context "the service ticket is not associated with a session" do
+      it "should return nils if there is no session for the given service ticket" do
+        subject.get_session_for_service_ticket(service_ticket).should == [nil, nil]
+      end
+    end
+  end
+
+  describe "#process_single_sign_out" do
+    context "the service ticket is nil" do
+      it "should raise CASException" do
+        expect { subject.process_single_sign_out(nil) }.to raise_exception(CASClient::CASException, /No service_ticket specified/)
+      end
+    end
+    context "the service ticket is associated with a session" do
+      before do
+        subject.store_service_session_lookup(service_ticket, mock_controller_with_session(nil, session))
+        session.save!
+        subject.process_single_sign_out(service_ticket)
+      end
+      context "the session" do
+        it "should be destroyed" do
+          if subject.instance_of?(CASClient::Tickets::Storage::ActiveModelMemcacheTicketStore)
+            dc = Dalli::Client.new
+            dc.get(session.session_id).should be_nil
+          elsif subject.instance_of?(CASClient::Tickets::Storage::ActiveModelRedisTicketStore)
+
+          else
+            ActiveRecord::SessionStore.session_class.find_by_session_id(session.session_id).should be_nil
+          end
+        end
+      end
+      it "should destroy session for the given service ticket" do
+        subject.process_single_sign_out(service_ticket)
+      end
+    end
+    context "the service ticket is not associated with a session" do
+      it "should run without error if there is no session for the given service ticket" do
+        expect { subject.process_single_sign_out(service_ticket) }.to_not raise_error
+      end
+    end
+  end
+
+  describe "#cleanup_service_session_lookup" do
+    context "the service ticket is nil" do
+      it "should raise CASException" do
+        expect { subject.cleanup_service_session_lookup(nil) }.to raise_exception(CASClient::CASException, /No service_ticket specified/)
+      end
+    end
+    it "should run without error" do
+      expect { subject.cleanup_service_session_lookup(service_ticket) }.to_not raise_exception
+    end
+  end
 end
 
 shared_examples "a ticket store" do
