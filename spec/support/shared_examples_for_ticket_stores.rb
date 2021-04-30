@@ -83,7 +83,7 @@ shared_examples "a ticket store interacting with sessions" do
             allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return(nil)
             dc.get_session({}, session.session_id).should nil
           else
-            ActiveRecord::SessionStore.session_class.find_by_session_id(session.session_id).should be_nil
+            ActiveRecord::SessionStore::Session.find_by_session_id(session.session_id).should be_nil
           end
         end
       end
