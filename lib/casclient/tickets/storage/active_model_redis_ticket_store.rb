@@ -210,12 +210,12 @@ module CASClient
 
         def self.setup_client(config)
           @@client ||= begin
-           ActionDispatch::Session::ActiveModelRedisStore.new(config ,config)
+           ActionDispatch::Session::ActiveModelRedisStore.new(config, config)
           end
         end
 
         def self.find_by_pgt_iou(pgt_iou)
-          pgtiou = @@client.get_session(RedisSessionStore.env,pgt_iou)[1]
+          pgtiou = @@client.get_session(RedisSessionStore.env, pgt_iou)[1]
           RedisPgtiou.new(pgtiou) if pgtiou
         end
 
@@ -229,7 +229,7 @@ module CASClient
         end
 
         def destroy
-          @@client.destroy_session(RedisSessionStore.env,self.pgt_iou,{})
+          @@client.destroy_session(RedisSessionStore.env, self.pgt_iou,{})
         end
       end
     end

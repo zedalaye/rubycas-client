@@ -1,4 +1,3 @@
-
 shared_examples "a ticket store interacting with sessions" do
 
   before do
@@ -139,7 +138,7 @@ shared_examples "a ticket store" do
       }
       session_id = global_session_id
       cache_data = CASClient::Tickets::Storage::RedisSessionStore.new("session_id" => "#{session_id}", "data" => {})
-      dc.set_session({}, session_id, cache_data,{})
+      dc.set_session({}, session_id, cache_data, {})
       cache_data
     else
       ActiveRecord::SessionStore::Session.create!(:session_id => "session#{rand(1000)}", :data => {})
