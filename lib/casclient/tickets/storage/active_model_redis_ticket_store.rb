@@ -1,4 +1,3 @@
-
 require 'casclient/frameworks/rails/filter'
 require 'redis'
 require 'redis-store'
@@ -122,15 +121,6 @@ module CASClient
             ActionDispatch::Session::ActiveModelRedisStore.new(config ,config)
           end
         end
-
-      #   def self.client(config)
-      #     redis_url = config && config[:redis_settings] && "#{config[:redis_settings]['host']}:#{config[:redis_settings]['port']}" || 'localhost:11211'
-      #     options = config[:redis_settings].clone if config.has_key?(:redis_settings)
-      #     options.delete("host") if options && options.has_key?("host")
-      #     options.delete("port") if options && options.has_key?("port")
-      #     @@options = options || {}
-      #     @@redis ||= Redis.new(redis_url, @@options)
-      # end
 
         def self.find_by_session_id(session_id)
           session_id = "#{namespaced_key(session_id)}"
