@@ -38,10 +38,10 @@ module CASClient
               obj_with_env = controller.respond_to?(:env) ? controller : controller.request
               obj_with_env.env['rack.session.record'] = new_session
             else
-              raise CASException, "Unable to store session #{session_id} for service ticket #{st} in the database."
+              raise CASException, "Unable to store session #{session_id} for service ticket #{st} in Redis."
             end
           else
-            update_all_sessions(session_id, st)
+            update_session(session_id, st)
           end
         end
 
@@ -80,7 +80,7 @@ module CASClient
         end
 
         private
-        def update_all_sessions(session_id, service_ticket)
+        def update_session(session_id, service_ticket)
           session = RedisSessionStore.find_by_session_id(session_id)
           session["session_id"] = session_id
           session["service_ticket"] = service_ticket
@@ -136,7 +136,7 @@ module CASClient
           if session
             RedisSessionStore.new(session)
           else
-            return false
+            false
           end
         end
 
