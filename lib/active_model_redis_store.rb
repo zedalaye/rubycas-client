@@ -55,12 +55,12 @@ module ActionDispatch
                 raise
               end
             else
-              message = session.has_key?('service_ticket') ? "Service ticket key present, @pool.exist?: #{service_ticket_session.present?}" : "Service ticket key is nil."
+              message = session.has_key?('service_ticket') ? "Service ticket key present, @service_ticket_session.present?: #{service_ticket_session.present?}" : "Service ticket key is nil."
               CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: [SESSION #{session_id}] #{message}")
             end
             super(env, session_id, options)
           else
-            CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: the retrieved pool session for session_id #{session_id} is nil")
+            CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: the retrieved session for session_id #{session_id} is nil")
           end
         end
       end
