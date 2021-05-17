@@ -87,9 +87,6 @@ module CASClient
           session["service_ticket"] = service_ticket
           RedisSessionStore.set_session(session_id,session)
         end
-        def find_by_session_id(controller, session_id)
-
-        end
       end
 
       ::ACTIVE_MODEL_REDIS_TICKET_STORE = ActiveModelRedisTicketStore
