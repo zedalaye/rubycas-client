@@ -1,4 +1,3 @@
-
 require 'casclient/frameworks/rails/filter'
 require 'redis'
 require 'redis-store'
@@ -39,10 +38,10 @@ module CASClient
               obj_with_env = controller.respond_to?(:env) ? controller : controller.request
               obj_with_env.env['rack.session.record'] = new_session
             else
-              raise CASException, "Unable to store session #{session_id} for service ticket #{st} in the database."
+              raise CASException, "Unable to store session #{session_id} for service ticket #{st} in Redis."
             end
           else
-            update_all_sessions(session_id, st)
+            update_session(session_id, st)
           end
         end
 
@@ -81,7 +80,7 @@ module CASClient
         end
 
         private
-        def update_all_sessions(session_id, service_ticket)
+        def update_session(session_id, service_ticket)
           session = RedisSessionStore.find_by_session_id(session_id)
           session["session_id"] = session_id
           session["service_ticket"] = service_ticket
@@ -120,15 +119,6 @@ module CASClient
           end
         end
 
-      #   def self.client(config)
-      #     redis_url = config && config[:redis_settings] && "#{config[:redis_settings]['host']}:#{config[:redis_settings]['port']}" || 'localhost:11211'
-      #     options = config[:redis_settings].clone if config.has_key?(:redis_settings)
-      #     options.delete("host") if options && options.has_key?("host")
-      #     options.delete("port") if options && options.has_key?("port")
-      #     @@options = options || {}
-      #     @@redis ||= Redis.new(redis_url, @@options)
-      # end
-
         def self.find_by_session_id(session_id)
           session_id = "#{namespaced_key(session_id)}"
           session = @@client.get_session(@env, session_id)[1]
@@ -143,7 +133,7 @@ module CASClient
           if session
             RedisSessionStore.new(session)
           else
-            return false
+            false
           end
         end
 
@@ -217,12 +207,12 @@ module CASClient
 
         def self.setup_client(config)
           @@client ||= begin
-           ActionDispatch::Session::ActiveModelRedisStore.new(config ,config)
+           ActionDispatch::Session::ActiveModelRedisStore.new(config, config)
           end
         end
 
         def self.find_by_pgt_iou(pgt_iou)
-          pgtiou = @@client.get_session(RedisSessionStore.env,pgt_iou)[1]
+          pgtiou = @@client.get_session(RedisSessionStore.env, pgt_iou)[1]
           RedisPgtiou.new(pgtiou) if pgtiou
         end
 
@@ -236,7 +226,7 @@ module CASClient
         end
 
         def destroy
-          @@client.destroy_session(RedisSessionStore.env,self.pgt_iou,{})
+          @@client.destroy_session(RedisSessionStore.env, self.pgt_iou,{})
         end
       end
     end

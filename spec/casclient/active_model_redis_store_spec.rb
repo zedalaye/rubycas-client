@@ -10,8 +10,8 @@ describe ActionDispatch::Session::ActiveModelRedisStore do
   describe 'session_destroy' do
 
     pool = ActionDispatch::Session::ActiveModelRedisStore.new nil, {
-        :cache => ActiveSupport::Cache::RedisStore.new,
-       :redis_server => { host: '127.0.0.1', port: 6379 , db: 0 } ,
+       :cache => ActiveSupport::Cache::RedisStore.new,
+       :redis_server => { host: '127.0.0.1', port: 6379 , db: 0 },
        :key => "_session_id",
        :raise_errors => true,
        :secure => false
