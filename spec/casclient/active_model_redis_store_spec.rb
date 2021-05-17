@@ -26,7 +26,7 @@ describe ActionDispatch::Session::ActiveModelRedisStore do
       allow_any_instance_of(Rack::Session::Redis).to receive(:destroy_session).and_return(true)
       logger = double('logger')
       allow(CASClient::LoggerWrapper).to receive(:new).and_return(logger)
-      expect(logger).to receive(:warn).with("Session::ActiveModelRedisStore#destroy_session: the retrieved pool session for session_id 12345 is nil")
+      expect(logger).to receive(:warn).with("Session::ActiveModelRedisStore#destroy_session: the retrieved session for session_id 12345 is nil")
       expect { subject.destroy_session '','12345', {} }.not_to raise_error
     end
 
@@ -36,7 +36,7 @@ describe ActionDispatch::Session::ActiveModelRedisStore do
       allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:exist?).and_return(true, false)
       allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return( [{"session_id" => " test"},{ "service_ticket" => "456790"}] ,[])
       allow_any_instance_of(Rack::Session::Redis).to receive(:destroy_session).and_return(true)
-      expect(logger).to receive(:warn).with("Session::ActiveModelRedisStore#destroy_session: [SESSION 12345] Service ticket key present, @pool.exist?: false")
+      expect(logger).to receive(:warn).with("Session::ActiveModelRedisStore#destroy_session: [SESSION 12345] Service ticket key present, @service_ticket_session.present?: false")
       expect { subject.destroy_session '','12345', {} }.not_to raise_error
     end
 
