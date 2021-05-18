@@ -138,8 +138,7 @@ module CASClient
         end
 
         def self.set_session(session_id, new_session)
-
-          session = @@client.set_session(@env, session_id,new_session, {})
+          @@client.set_session(@env, session_id,new_session, {})
         end
 
 
