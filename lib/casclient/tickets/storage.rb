@@ -32,7 +32,7 @@ module CASClient
             if Rails::VERSION::MAJOR > 3
               session = ActionDispatch::Session::ActiveRecordStore.session_class.find_by_session_id(session_id)
             else
-              session = ActiveRecord::SessionStore.session_class.find_by_session_id(session_id)
+              session = ActiveRecord::SessionStore::Session.find_by_session_id(session_id)
             end
           else
             log.warn("Couldn't destroy session service ticket #{st} because no corresponding session id could be found.")
