@@ -50,9 +50,9 @@ module ActionDispatch
             if service_ticket_session.present?
               begin
                 super(env, service_ticket_session, options)
-              rescue Exception => e
-                CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: #{e.message}")
-                raise
+              rescue => e
+                CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: #{e}")
+                raise if @raise_errors
               end
             else
               message = session.has_key?('service_ticket') ? "Service ticket key present, @service_ticket_session.present?: #{service_ticket_session.present?}" : "Service ticket key is nil."
