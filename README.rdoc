@@ -191,6 +191,11 @@ Rails.application.config.session_store ActionDispatch::Session::ActiveModelRedis
                                            
 With <tt>ActionDispatch::Session::ActiveModelRedisStore</tt> managing sessions through either session_id or service_ticket. <tt>"REDIS_SETTINGS</tt> contains the configuration to access the Redis server.
 
+The following gems will also need to be added to the Gem file:
+
+    gem 'redis', '4.2.5'
+    gem 'redis-actionpack', '4.0.1'
+    gem 'redis-rails', '4.0.0'
 
 ==== Re-authenticating on every request (i.e. the "single sign-out problem")
 
