@@ -1,4 +1,5 @@
 require 'active_record'
+require 'active_record/session_store'
 
 module ActiveRecordHelpers
 
@@ -9,6 +10,7 @@ module ActiveRecordHelpers
       ActiveRecord::Base.establish_connection(db_config[(RUBY_PLATFORM == "java") ? :testjruby : :test])
       ActiveRecord::Migration.verbose = false
       RubyCasTables.migrate(:up)
+
     end
 
     def teardown_active_record

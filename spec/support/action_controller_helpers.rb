@@ -27,6 +27,8 @@ module ActionControllerHelpers
     mock_request.stub(:post?) {true}
     mock_request.stub(:session_options) { Hash.new }
     mock_request.stub(:headers) { Hash.new }
+    mock_request.stub(:env) {{}}
+    mock_request.stub(:session_id) {"session_id"}
     mock_request
   end
 end

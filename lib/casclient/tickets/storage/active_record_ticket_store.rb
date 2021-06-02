@@ -1,3 +1,5 @@
+require 'active_record/session_store'
+
 module CASClient
   module Tickets
     module Storage
