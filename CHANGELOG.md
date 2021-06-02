@@ -1,6 +1,6 @@
 # RubyCAS-Client Changelog
 
-## 3.0.8
+## 3.1.0
 * New Functionality
   * Now supports Redis as an option for configuring the session storage client.
   * There is no impact to existing working of Memcached.
