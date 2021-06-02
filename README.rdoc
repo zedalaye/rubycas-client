@@ -177,7 +177,7 @@ CASClient::Frameworks::Rails::Filter.configure(
     ...
 )
 
-Set up an ActiveModelRedisStore to be able to have the session be created and destroyed with the service_tickets under <tt>config/initializers/active_model_redis_store.rb<tt>; similar to the one in templates/active_model_redis_store.rb
+Set up an ActiveModelRedisStore to be able to have the session be created and destroyed with the service_tickets under <tt>config/initializers/active_model_redis_store.rb</tt>; similar to the one in templates/active_model_redis_store.rb
 
 Set up session storage under <tt>config/initializers/session_store.rb</tt>
 
