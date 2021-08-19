@@ -2,7 +2,7 @@
 
 ## 3.1.1
 * Other
- * Use controller.request in `active_record_ticket_store` instead of controller to set `.env` value for rack. Rails 5.1+ change.
+  * Use controller.request in `active_record_ticket_store` instead of controller to set `.env` value for rack. Rails 5.1+ change.
 
 ## 3.1.0
 * New Functionality
