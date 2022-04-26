@@ -5,6 +5,7 @@ require 'redis-actionpack'
 require 'action_dispatch/middleware/session/redis_store'
 require 'active_support/cache/redis_store'
 require 'redis-rack'
+require 'rack/session/abstract/id'
 
 module ActionDispatch
   module Session
@@ -17,24 +18,15 @@ module ActionDispatch
     # * <tt>expire_after</tt>  - The length of time a session will be stored before automatically expiring.
     #   By default, the <tt>:expires_in</tt> option of the cache is used.
     class ActiveModelRedisStore < ActionDispatch::Session::RedisStore
+      SERVICE_TICKET = "service_ticket".freeze
 
-      def initialize(app, options = {} )
-        options = options.dup
-        options[:redis_server] ||= options[:servers]
-        super
-      end
-
-      def get_session(env, sid)
-        super(env, sid)
-      end
-
-      def set_session(env, sid, new_session, options)
-        session = self.get_session(env, sid)[1]
+      def write_session(req, sid, new_session, options = {})
+        session = find_session(req, sid)[1]
         unless session.nil?
           # Copy session_id and service_ticket into the session_data
           %w(sid service_ticket).each { |key| new_session[key] = session[key] if session[key] }
         end
-        super(env, sid, new_session, options)
+        super(req, sid, new_session, options)
       end
 
       # The service ticket is also being stored in Redis in the form -
@@ -42,41 +34,27 @@ module ActionDispatch
       # session_id => {session_data}
       # Need to ensure that when a session is being destroyed - we also clean up the service-ticket
       # related data prior to letting the session be destroyed.
-      def destroy_session(env, session_id, options)
-        session = self.get_session(env, session_id)[1]
+      def delete_session(req, session_id, options = {})
+        session = find_session(req, session_id)[1]
         if session.present?
-          if session.has_key?("service_ticket")
-            service_ticket_session = self.get_session(env, session["service_ticket"])[1]
+          if session.key?(SERVICE_TICKET)
+            service_ticket_session = find_session(req, ::Rack::Session::SessionId.new(session[SERVICE_TICKET]))[1]
             if service_ticket_session.present?
               begin
-                super(env, service_ticket_session, options)
+                super(req, service_ticket_session, options)
               rescue => e
-                CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: #{e}")
+                CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#delete_session: #{e}")
                 raise if raise_errors?
               end
             else
-              message = session.has_key?('service_ticket') ? "Service ticket key present, @service_ticket_session.present?: #{service_ticket_session.present?}" : "Service ticket key is nil."
-              CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: [SESSION #{session_id}] #{message}")
+              CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#delete_session: [SESSION #{session_id}] Service ticket key is nil.")
             end
-            super(env, session_id, options)
+            super(req, session_id, options)
           else
-            CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#destroy_session: the retrieved session for session_id #{session_id} is nil")
+            CASClient::LoggerWrapper.new.warn("Session::ActiveModelRedisStore#delete_session: the retrieved session for session_id #{session_id} is nil")
           end
         end
       end
-
-      # Patch Rack 2.0 changes that broke ActionDispatch.
-      alias_method :find_session, :get_session
-      alias_method :write_session, :set_session
-      alias_method :delete_session, :destroy_session
-
-    end
-  end
-end
-
-module ActiveSupport
-  module Cache
-    class RedisCacheStore
     end
   end
 end

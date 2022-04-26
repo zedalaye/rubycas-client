@@ -1,12 +1,23 @@
+dist: focal
 language: ruby
-dist: trusty
+cache: bundler
 
 rvm:
-  - 2.5.0
+  - 2.6
+  - 2.7
+
+jobs:
+  exclude:
+    - rvm: 2.6
+      gemfile: gemfiles/rails_7.0.gemfile
+
+gemfile:
+  - gemfiles/rails_6.0.gemfile
+  - gemfiles/rails_6.1.gemfile
+  - gemfiles/rails_7.0.gemfile
 
 before_install:
-  - gem update --system
-  - gem install bundler -v $(tail -n1 Gemfile.lock)
+  - gem update --system --force -N > /dev/null && echo "Rubygems version $(gem --version)" && bundle --version
 
 script:
   - bundle exec rspec

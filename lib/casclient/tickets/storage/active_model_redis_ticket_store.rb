@@ -3,6 +3,7 @@ require 'redis'
 require 'redis-store'
 require 'redis-activesupport'
 require 'redis-actionpack'
+require 'rack/session/abstract/id'
 
 module CASClient
   module Tickets
@@ -22,7 +23,7 @@ module CASClient
           st = st.ticket if st.kind_of? ServiceTicket
           session_id = session_id_from_controller(controller)
           # Create a session in the DB if it hasn't already been created.
-          RedisSessionStore.env = controller.request.env
+          RedisSessionStore.req = controller.request
 
           unless RedisSessionStore.find_by_session_id(session_id)
             log.info("RubyCAS Client did not find #{session_id} in the Session Store. Creating it now!")
@@ -84,7 +85,7 @@ module CASClient
           session = RedisSessionStore.find_by_session_id(session_id)
           session["session_id"] = session_id
           session["service_ticket"] = service_ticket
-          RedisSessionStore.set_session(session_id,session)
+          RedisSessionStore.write_session(session_id, session)
         end
       end
 
@@ -95,7 +96,7 @@ module CASClient
         attr_accessor :session_id, :service_ticket, :data
 
         class << self
-          attr_accessor :client, :env
+          attr_accessor :client, :req
         end
 
         def initialize(options={})
@@ -114,14 +115,12 @@ module CASClient
         end
 
         def self.setup_client(config)
-          @@client ||= begin
-            ActionDispatch::Session::ActiveModelRedisStore.new(config ,config)
-          end
+          @@client ||= ActionDispatch::Session::ActiveModelRedisStore.new(config ,config)
         end
 
         def self.find_by_session_id(session_id)
-          session_id = "#{namespaced_key(session_id)}"
-          session = @@client.get_session(@env, session_id)[1]
+          session_id = namespaced_key(session_id)
+          session = @@client.find_session(@req, session_id)[1]
 
           # Unlike Memcached, Redis .get returns a serialized hash...
           # Alternately, data could be saved as redis native hash data using redis.hmset and retrieved with .hgetall
@@ -137,20 +136,20 @@ module CASClient
           end
         end
 
-        def self.set_session(session_id, new_session)
-          @@client.set_session(@env, session_id,new_session, {})
+        def self.write_session(session_id, new_session)
+          @@client.write_session(@req, ::Rack::Session::SessionId.new(session_id), new_session.session_data)
         end
 
 
         def self.find_by_service_ticket(service_ticket)
-          session_id = @@client.get_session(@env, "#{namespaced_key(service_ticket)}")
+          session_id = @@client.find_session(@req, namespaced_key(service_ticket))
           session = RedisSessionStore.find_by_session_id(session_id) if session_id
           session.session_id if session
         end
 
         def session_data
           data = {}
-          self.instance_variables.each{|key| data[key.to_s.sub(/\A@/, '')] = self[key.to_s.sub(/\A@/, '')]}
+          self.instance_variables.each{ |key| data[key.to_s.sub(/\A@/, '')] = self[key.to_s.sub(/\A@/, '')] }
           data
         end
 
@@ -167,14 +166,14 @@ module CASClient
         # service_ticket => session_id
         # session_id => {session_data}
         def save
-          @@client.set_session(@env, namespaced_key(service_ticket), session_id, {})
+          @@client.write_session(@req, namespaced_key(service_ticket), session_id)
           # It's easiest to convert data to json, then parse when reading above in .find_by_session_id.
-          @@client.set_session(@env, namespaced_key(session_id), session_data.to_json,{})
+          @@client.write_session(@req, namespaced_key(session_id), session_data.to_json)
         end
 
         def destroy
-          @@client.destroy_session(@env, namespaced_key(service_ticket),{})
-          @@client.destroy_session(@env, namespaced_key(session_id),{})
+          @@client.delete_session(@req, namespaced_key(service_ticket))
+          @@client.delete_session(@req, namespaced_key(session_id))
         end
 
         alias_method :save!, :save
@@ -184,9 +183,9 @@ module CASClient
         # Hence having the same name methods for both class and instance.
         def self.namespaced_key(key)
           if @namespace
-            "#{@namespace}:#{key}"
+            ::Rack::Session::SessionId.new("#{@namespace}:#{key}")
           else
-            key.to_s
+            ::Rack::Session::SessionId.new(key.to_s)
           end
         end
 
@@ -199,33 +198,31 @@ module CASClient
         include ActiveModel
         attr_accessor :pgt_iou, :pgt_id
 
-        def initialize(options={})
+        def initialize(options = {})
           @pgt_iou = options[:pgt_iou]
           @pgt_id = options[:pgt_id]
         end
 
         def self.setup_client(config)
-          @@client ||= begin
-           ActionDispatch::Session::ActiveModelRedisStore.new(config, config)
-          end
+          @@client ||= ActionDispatch::Session::ActiveModelRedisStore.new(config, config)
         end
 
         def self.find_by_pgt_iou(pgt_iou)
-          pgtiou = @@client.get_session(RedisSessionStore.env, pgt_iou)[1]
-          RedisPgtiou.new(pgtiou) if pgtiou
+          pgtiou = @@client.find_session(RedisSessionStore.req, ::Rack::Session::SessionId.new(pgt_iou))[1]
+          new(pgtiou) if pgtiou
         end
 
         def self.create(options)
-          pgtiou = RedisPgtiou.new(options)
-          @@client.set_session({}, pgtiou.pgt_iou, pgtiou.session_data, {})
+          pgtiou = new(options)
+          @@client.write_session(RedisSessionStore.req, ::Rack::Session::SessionId.new(pgtiou.pgt_iou), pgtiou.session_data)
         end
 
         def session_data
-          {pgt_iou: self.pgt_iou, pgt_id: self.pgt_id}
+          { pgt_iou: pgt_iou, pgt_id: pgt_id }
         end
 
         def destroy
-          @@client.destroy_session(RedisSessionStore.env, self.pgt_iou,{})
+          @@client.delete_session(RedisSessionStore.req, ::Rack::Session::SessionId.new(pgt_iou))
         end
       end
     end

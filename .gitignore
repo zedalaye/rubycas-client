@@ -24,3 +24,6 @@ pkg
 
 .project
 .idea
+
+/Gemfile.lock
+/gemfiles/*.gemfile.lock
