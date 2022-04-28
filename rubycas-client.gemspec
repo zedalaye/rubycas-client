@@ -18,14 +18,14 @@ Gem::Specification.new do |s|
   s.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   s.require_paths = ["lib"]
 
-  s.add_runtime_dependency 'activesupport', '>= 6.0', '< 7.1'
+  s.add_runtime_dependency 'activesupport', '>= 5.2', '< 7.1'
   s.add_runtime_dependency 'dalli', '~> 2.0'
   s.add_runtime_dependency 'dice_bag', '>= 0.9', '< 2.0'
   s.add_runtime_dependency 'redis-rack', '~> 2.1'
   s.add_runtime_dependency 'rexml'
 
-  s.add_development_dependency 'actionpack', '>= 6.0', '< 7.1'
-  s.add_development_dependency 'activerecord', '>= 6.0', '< 7.1'
+  s.add_development_dependency 'actionpack', '>= 5.2', '< 7.1'
+  s.add_development_dependency 'activerecord', '>= 5.2', '< 7.1'
   s.add_development_dependency 'activerecord-session_store', '>= 0'
   s.add_development_dependency 'appraisal', '~> 2.4'
   s.add_development_dependency 'bundler', '>= 1.0'
