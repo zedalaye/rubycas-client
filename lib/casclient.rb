@@ -4,15 +4,9 @@ require 'logger'
 require 'net/https'
 require 'rexml/document'
 require 'casclient/dice_bag/cas_template'
+require 'active_support'
 require 'active_model_memcache_store'
 require 'active_model_redis_store'
-
-begin
-  require 'active_support'
-rescue LoadError
-  require 'rubygems'
-  require 'active_support'
-end
 
 $: << File.expand_path(File.dirname(__FILE__))
 
@@ -28,18 +22,18 @@ module CASClient
       @default_formatter = Formatter.new
       super
     end
-  
+
     def format_message(severity, datetime, progrname, msg)
       (@formatter || @default_formatter).call(severity, datetime, progname, msg)
     end
-    
+
     def break
       self << $/
     end
-    
+
     class Formatter < ::Logger::Formatter
       Format = "[%s#%d] %5s -- %s: %s\n"
-      
+
       def call(severity, time, progname, msg)
         Format % [format_datetime(time), $$, severity, progname, msg2str(msg)]
       end

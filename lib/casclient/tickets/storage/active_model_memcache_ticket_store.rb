@@ -8,7 +8,7 @@ module CASClient
           config ||= {}
           MemcacheSessionStore.client(config) if config
         end
-        
+
         def store_service_session_lookup(st, controller)
           raise CASException, 'No service_ticket specified.' unless st
           raise CASException, 'No controller specified.' unless controller
@@ -138,7 +138,7 @@ module CASClient
         # As Memcache is a key value store we are storing the session in the form of
         # session_id => {session_data}
         #
-        # We do also need to be able to retrieve the session using just the service_ticket, and as 
+        # We do also need to be able to retrieve the session using just the service_ticket, and as
         # this is a key value store - we need to store the service_ticket as a key - pointing to
         # the session_id which will give us the session data
         # service_ticket => session_id

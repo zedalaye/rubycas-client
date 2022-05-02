@@ -10,14 +10,12 @@ describe CASClient::Tickets::Storage::ActiveModelRedisTicketStore do
       controller = mock_controller_with_session
       controller.stub_chain(:session, :session_id).and_return("nonexistant_session")
       controller.stub_chain(:env, :[]=)
-      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["nonexistant_session", {"service_ticket" => "ST-id"}])
-      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["nonexistant_session", {"service_ticket" => "ST-id"}])
-
-      @redis_mock_store = {}
+      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:find_session).and_return([], ["nonexistant_session", {"service_ticket" => "ST-id"}])
+      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:write_session).and_return(["nonexistant_session", {"service_ticket" => "ST-id"}])
 
       service_ticket = CASClient::ServiceTicket.new("ST-id", "ActiveModelRedisTicketStore")
       subject.store_service_session_lookup(service_ticket, controller)
-      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return(["nonexistant_session", {"service_ticket" => "ST-id"}])
+      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:find_session).and_return(["nonexistant_session", {"service_ticket" => "ST-id"}])
       new_session = CASClient::Tickets::Storage::RedisSessionStore.find_by_session_id("nonexistant_session")
       new_session.service_ticket.should eql("ST-id")
     end
@@ -26,15 +24,13 @@ describe CASClient::Tickets::Storage::ActiveModelRedisTicketStore do
       controller = mock_controller_with_session
       controller.stub_chain(:session, :session_id).and_return("existing_session")
       controller.stub_chain(:env, :[]=)
-      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["existing_session", {"session_id" => "existing_session"}])
-      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["existing_session", {"session_id" => "existing_session"}])
-
-      @redis_mock_store = {"existing_session" => {"service_ticket" => "ST-id"}}
+      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:find_session).and_return([], ["existing_session", {"session_id" => "existing_session"}])
+      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:write_session).and_return(["existing_session", {"session_id" => "existing_session"}])
 
       service_ticket = CASClient::ServiceTicket.new("ST-new", "ActiveModelRedisTicketStore")
       subject.store_service_session_lookup(service_ticket, controller)
-      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return(["existing_session", {"service_ticket" => "ST-new"}])
-      subject.read_service_session_lookup(service_ticket).should eql("existing_session")
+      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:find_session).and_return(["existing_session", {"service_ticket" => "ST-new"}])
+      expect(subject.read_service_session_lookup(service_ticket)).to eq("existing_session")
     end
 
     it 'uses correct controller method to access rack session environment' do
@@ -42,10 +38,8 @@ describe CASClient::Tickets::Storage::ActiveModelRedisTicketStore do
       controller.stub_chain(:session, :session_id).and_return('existing_session')
       controller.stub(:respond_to?) { false }
       controller.stub_chain(:request, :env, :[]=)
-      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:get_session).and_return([], ["existing_session", {"session_id" => "existing_session"}])
-      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:set_session).and_return(["existing_session", {"session_id" => "existing_session"}])
-
-      @redis_mock_store = {'existing_session' => {'service_ticket' => 'ST-id'}}
+      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:find_session).and_return([], ["existing_session", {"session_id" => "existing_session"}])
+      allow_any_instance_of(ActionDispatch::Session::ActiveModelRedisStore).to receive(:write_session).and_return(["existing_session", {"session_id" => "existing_session"}])
 
       service_ticket = CASClient::ServiceTicket.new('ST-new', 'ActiveModelRedisTicketStore')
       subject.store_service_session_lookup(service_ticket, controller)

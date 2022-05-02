@@ -1,3 +1,5 @@
+require 'action_controller'
+
 # Rails controller that responds to proxy generating ticket callbacks from the CAS server and allows
 # for retrieval of those PGTs.
 class CasProxyCallbackController < ActionController::Base
@@ -12,15 +14,15 @@ class CasProxyCallbackController < ActionController::Base
     #  request.ssl? or request.env['REMOTE_HOST'] == "127.0.0.1"
 
     pgtIou = params['pgtIou']
-    
+
     # CAS Protocol spec says that the argument should be called 'pgt', but the JA-SIG CAS server seems to use pgtId.
     # To accomodate this, we check for both parameters, although 'pgt' takes precedence over 'pgtId'.
     pgtId = params['pgt'] || params['pgtId']
-    
+
     # We need to render a response with HTTP status code 200 when no pgtIou/pgtId is specified because CAS seems first
     # call the action without any parameters (maybe to check if the server responds correctly)
     render :text => "Okay, the server is up, but please specify a pgtIou and pgtId." and return unless pgtIou and pgtId
-    
+
     # TODO: pstore contents should probably be encrypted...
 
     if Rails::VERSION::MAJOR > 2
@@ -33,13 +35,13 @@ class CasProxyCallbackController < ActionController::Base
 
     render :text => "PGT received. Thank you!" and return
   end
-  
+
   private
     def render_error(msg)
       # Note that the error messages are mostly just for debugging, since the CAS server never reads them.
       render :text => msg, :status => 500
     end
-    
+
     def open_pstore
       PStore.new("#{::Rails.root}/tmp/cas_pgt.pstore")
     end

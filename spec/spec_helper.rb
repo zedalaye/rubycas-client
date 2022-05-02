@@ -3,6 +3,7 @@ Bundler.setup(:default, :development)
 require 'simplecov' unless ENV['TRAVIS']
 Bundler.require
 
+require 'byebug'
 require 'rubycas-client'
 
 SPEC_TMP_DIR="spec/tmp"
@@ -31,13 +32,10 @@ RSpec.configure do |config|
   config.before(:each) do
     DatabaseCleaner.start
     ActiveModelMemcacheTicketStoreHelpers.setup_memcache_store
-    ActiveModelRedisTicketStoreHelpers.setup_redis_store
   end
 
   config.after(:each) do
     DatabaseCleaner.clean
     ActiveModelMemcacheTicketStoreHelpers.teardown_memcache_store
-    ActiveModelRedisTicketStoreHelpers.teardown_redis_store
   end
 end
-

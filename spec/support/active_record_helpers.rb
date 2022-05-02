@@ -19,7 +19,7 @@ module ActiveRecordHelpers
     end
   end
 
-  class RubyCasTables < ActiveRecord::Migration
+  class RubyCasTables < ActiveRecord::Migration[4.2]
     def self.up
       #default rails sessions table
       create_table :sessions do |t|
