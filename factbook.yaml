@@ -1,0 +1,30 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+spec:
+  type: web_backend
+  lifecycle: production
+  owner: team28@mdsol.com
+metadata:
+  json_schema: https://github.com/mdsol/platform-standards/tree/master/schemas/v1alpha1.schema.json
+  name: rubycas-client
+  title: RubyCAS-Client
+  description: RubyCAS-Client is a Ruby client library for Yale's Central Authentication Service (CAS) protocol.
+  security:
+    authentication: [mauth]
+    network_accessiblity: [private]
+    data_types: [clinical]
+  teams:
+    - name: Team 28
+      number: 28
+      email: team28@mdsol.com
+  people:
+    - role: architect
+      email: <TBD> 
+  channels:
+    - url: https://mdsol.slack.com/messages/C03B8T0AZGQ/details/
+      automated_messaging: false
+      role: slack
+  pipelines:
+    - url: https://travis-ci.com/github/mdsol/rubycas-client
+      role: Integration
