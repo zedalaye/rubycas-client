@@ -20,7 +20,7 @@ metadata:
       email: team28@mdsol.com
   people:
     - role: architect
-      email: <TBD> 
+      email: cwhite@mdsol.com
   channels:
     - url: https://mdsol.slack.com/messages/C03B8T0AZGQ/details/
       automated_messaging: false
