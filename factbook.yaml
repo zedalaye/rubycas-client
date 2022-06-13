@@ -4,7 +4,7 @@ kind: Component
 spec:
   type: web_backend
   lifecycle: production
-  owner: team28@mdsol.com
+  owner: imedidata-core-team@mdsol.com
 metadata:
   json_schema: https://github.com/mdsol/platform-standards/tree/master/schemas/v1alpha1.schema.json
   name: rubycas-client
