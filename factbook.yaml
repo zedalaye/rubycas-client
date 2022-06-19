@@ -8,12 +8,8 @@ spec:
 metadata:
   json_schema: https://github.com/mdsol/platform-standards/tree/master/schemas/v1alpha1.schema.json
   name: rubycas-client
-  title: RubyCAS-Client
+  title: RubyCAS Client
   description: RubyCAS-Client is a Ruby client library for Yale's Central Authentication Service (CAS) protocol.
-  security:
-    authentication: [mauth]
-    network_accessiblity: [private]
-    data_types: [clinical]
   teams:
     - name: Team 28
       number: 28
