@@ -11,9 +11,8 @@ metadata:
   title: RubyCAS Client
   description: RubyCAS-Client is a Ruby client library for Yale's Central Authentication Service (CAS) protocol.
   teams:
-    - name: Team 28
-      number: 28
-      email: team28@mdsol.com
+    - name: imedidata core team
+      email: imedidata-core-team@mdsol.com
   people:
     - role: architect
       email: cwhite@mdsol.com
