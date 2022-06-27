@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 spec:
-  type: web_backend
+  type: library
   lifecycle: production
   owner: imedidata-core-team@mdsol.com
 metadata:
