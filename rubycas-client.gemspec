@@ -18,18 +18,17 @@ Gem::Specification.new do |s|
   s.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   s.require_paths = ["lib"]
 
-  # s.add_runtime_dependency 'activesupport', '>= 5.2', '< 7.1'
-  # s.add_runtime_dependency 'dalli', '~> 2.0'
-  # s.add_runtime_dependency 'dice_bag', '>= 0.9', '< 2.0'
-  # s.add_runtime_dependency 'redis-rack', '~> 2.1'
   s.add_runtime_dependency 'rexml'
 
   s.add_development_dependency 'actionpack', '>= 5.2', '< 7.1'
   s.add_development_dependency 'activerecord', '>= 5.2', '< 7.1'
   s.add_development_dependency 'activerecord-session_store', '>= 0'
+  s.add_development_dependency 'activesupport', '>= 5.2', '< 7.1'
   s.add_development_dependency 'appraisal', '~> 2.4'
   s.add_development_dependency 'bundler', '>= 1.0'
   s.add_development_dependency 'byebug'
+  s.add_development_dependency 'dalli', '~> 2.0'
+  s.add_development_dependency 'dice_bag', '>= 0.9', '< 2.0'
   s.add_development_dependency 'database_cleaner', '>= 0'
   s.add_development_dependency 'guard', '>= 0'
   s.add_development_dependency 'guard-rspec', '>= 0'
@@ -37,6 +36,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake', '>= 0'
   s.add_development_dependency 'redis', '~> 4.5'
   s.add_development_dependency 'redis-actionpack', '~> 5.2'
+  s.add_development_dependency 'redis-rack', '~> 2.1'
   s.add_development_dependency 'redis-rails', '~> 5.0'
   s.add_development_dependency 'rspec', '~> 2.0'
   s.add_development_dependency 'simplecov', '>= 0'
