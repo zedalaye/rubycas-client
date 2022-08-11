@@ -3,10 +3,12 @@ require 'cgi'
 require 'logger'
 require 'net/https'
 require 'rexml/document'
-require 'casclient/dice_bag/cas_template'
-require 'active_support'
-require 'active_model_memcache_store'
-require 'active_model_redis_store'
+
+# require 'casclient/dice_bag/cas_template'
+
+# require 'active_support'
+# require 'active_model_memcache_store'
+# require 'active_model_redis_store'
 
 $: << File.expand_path(File.dirname(__FILE__))
 
