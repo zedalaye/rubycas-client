@@ -115,14 +115,14 @@ module CASClient
 
         # Returns the local Rails session ID corresponding to the given
         # ServiceTicket. This is done by reading the contents of the
-        # cas_sess.<session ticket> file created in a prior call to 
+        # cas_sess.<session ticket> file created in a prior call to
         # #store_service_session_lookup.
         def read_service_session_lookup(st)
           raise CASException, "No service_ticket specified." if st.nil?
 
           st = st.ticket if st.kind_of? ServiceTicket
           ssl_filename = filename_of_service_session_lookup(st)
-          return IO.read(ssl_filename) if File.exists?(ssl_filename)
+          return IO.read(ssl_filename) if File.exist?(ssl_filename)
         end
 
         # Removes a stored relationship between a ServiceTicket and a local
@@ -135,7 +135,7 @@ module CASClient
 
           st = st.ticket if st.kind_of? ServiceTicket
           ssl_filename = filename_of_service_session_lookup(st)
-          File.delete(ssl_filename) if File.exists?(ssl_filename)
+          File.delete(ssl_filename) if File.exist?(ssl_filename)
         end
 
         def save_pgt_iou(pgt_iou, pgt)
