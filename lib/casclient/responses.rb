@@ -90,26 +90,26 @@ module CASClient
 
     def parse_extra_attribute_value(value, encode_extra_attributes_as)
       attr_value = if value.blank?
-         nil
-       elsif !encode_extra_attributes_as
-         begin
-           YAML.load(value)
-         rescue ArgumentError => e
-           raise ArgumentError, "Error parsing extra attribute with value #{value} as YAML: #{e}"
-         end
-       else
-         if encode_extra_attributes_as == :json
-           begin
-             JSON.parse(value)
-           rescue JSON::ParserError
-             value
-           end
-         elsif encode_extra_attributes_as == :raw
-           value
-         else
-           YAML.load(value)
-         end
-       end
+        nil
+      elsif !encode_extra_attributes_as
+        begin
+          YAML.unsafe_load(value)
+        rescue ArgumentError => e
+          raise ArgumentError, "Error parsing extra attribute with value #{value} as YAML: #{e}"
+        end
+      else
+        if encode_extra_attributes_as == :json
+          begin
+            JSON.parse(value)
+          rescue JSON::ParserError
+            value
+          end
+        elsif encode_extra_attributes_as == :raw
+          value
+        else
+          YAML.unsafe_load(value)
+        end
+      end
 
       unless attr_value.kind_of?(Enumerable) || attr_value.kind_of?(TrueClass) || attr_value.kind_of?(FalseClass) || attr_value.nil?
         attr_value.to_s
