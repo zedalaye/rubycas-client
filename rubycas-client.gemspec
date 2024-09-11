@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_runtime_dependency 'rexml'
+  s.add_runtime_dependency 'pstore'
 
   s.add_development_dependency 'actionpack', '>= 5.2', '< 7.1'
   s.add_development_dependency 'activerecord', '>= 5.2', '< 7.1'
